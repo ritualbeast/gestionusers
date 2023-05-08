@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import '../../styles/createuser.css';
 
-const CreateUser = () => {
+const ModificarUser = () => {
   const [formState, setFormState] = useState({
     firstName: '',
     lastName: '',
@@ -24,7 +24,7 @@ const CreateUser = () => {
     <div className="container mt-5">
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <h2>Crear nuevo Usuario</h2>
+          <h2>Modificar Usuario</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="firstName" className="form-label">First Name</label>
@@ -91,6 +91,6 @@ const CreateUser = () => {
   );
 };
 
-export default CreateUser;
+export default ModificarUser;
 
 

@@ -3,26 +3,10 @@ import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
 import { useState } from 'react';
 // @mui
-import {
-  Card,
-  Table,
-  Stack,
-  Paper,
-  Avatar,
-  Button,
-  Popover,
-  Checkbox,
-  TableRow,
-  MenuItem,
-  Modal,
-  TableBody,
-  TableCell,
-  Container,
-  Typography,
-  IconButton,
-  TableContainer,
-  TablePagination, 
-  Box
+import {Card,Table,  Stack,  Paper, Avatar,  Button,
+  Popover,  Checkbox,  TableRow,  MenuItem,
+  Modal,  TableBody,  TableCell,  Container,
+  Typography,  IconButton, TableContainer, TablePagination, Box, Dialog
 
 } from '@mui/material';
 // components
@@ -34,7 +18,7 @@ import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
-
+import DeleteUser from './userPages/DeleteUser';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -86,6 +70,8 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openModal, setOpenModal] = useState(false);
+  const [openEliminar, setOpenEliminar] = useState(false);
+
   
 
 
@@ -96,7 +82,13 @@ export default function UserPage() {
   const handleCloseMenu = () => {
     setOpen(null);
   };
+  const handleOpenEliminar = () => {
+    setOpenEliminar(true);
+  };
 
+  const handleCloseEliminar = () => {
+    setOpenEliminar(false);
+  };
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -161,21 +153,7 @@ export default function UserPage() {
       <Helmet>
         <title> User | Minimal UI </title>
       </Helmet>
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Box sx={{ width: '50%' }}>
-          <CreateUser />
-        </Box>
-      </Modal>
-
-
+      
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
@@ -310,11 +288,41 @@ export default function UserPage() {
           Editar
         </MenuItem>
 
-        <MenuItem sx={{ color: 'error.main' }}>
+        <MenuItem sx={{ color: 'error.main' }}
+          onClick={handleOpenEliminar}
+        >
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
           Eliminar
         </MenuItem>
       </Popover>
+
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ width: '50%' }}>
+          <CreateUser />
+        </Box>
+      </Modal>
+
+      <Modal
+        open={openEliminar}
+        onClose={handleCloseEliminar}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ width: '50%' }}>
+          <DeleteUser />
+        </Box>
+      </Modal>
     </>
   );
 }
