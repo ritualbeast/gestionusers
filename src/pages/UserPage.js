@@ -21,7 +21,9 @@ import {
   Typography,
   IconButton,
   TableContainer,
-  TablePagination,
+  TablePagination, 
+  Box
+
 } from '@mui/material';
 // components
 import Label from '../components/label';
@@ -31,6 +33,7 @@ import Scrollbar from '../components/scrollbar';
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 // mock
 import USERLIST from '../_mock/user';
+import CreateUser from './userPages/createUser';
 
 // ----------------------------------------------------------------------
 
@@ -158,6 +161,20 @@ export default function UserPage() {
       <Helmet>
         <title> User | Minimal UI </title>
       </Helmet>
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ width: '50%' }}>
+          <CreateUser />
+        </Box>
+      </Modal>
+
 
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
