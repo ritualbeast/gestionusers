@@ -14,6 +14,7 @@ import {
   Checkbox,
   TableRow,
   MenuItem,
+  Modal,
   TableBody,
   TableCell,
   Container,
@@ -34,10 +35,10 @@ import USERLIST from '../_mock/user';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name', alignRight: false },
-  { id: 'company', label: 'Company', alignRight: false },
-  { id: 'role', label: 'Role', alignRight: false },
-  { id: 'isVerified', label: 'Verified', alignRight: false },
+  { id: 'name', label: 'Nombre', alignRight: false },
+  { id: 'company', label: 'Empresa', alignRight: false },
+  { id: 'role', label: 'Rol', alignRight: false },
+  { id: 'isVerified', label: 'Verificado', alignRight: false },
   { id: 'status', label: 'Status', alignRight: false },
   { id: '' },
 ];
@@ -75,18 +76,15 @@ function applySortFilter(array, comparator, query) {
 
 export default function UserPage() {
   const [open, setOpen] = useState(null);
-
   const [page, setPage] = useState(0);
-
   const [order, setOrder] = useState('asc');
-
   const [selected, setSelected] = useState([]);
-
   const [orderBy, setOrderBy] = useState('name');
-
   const [filterName, setFilterName] = useState('');
-
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [openModal, setOpenModal] = useState(false);
+  
+
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -146,6 +144,15 @@ export default function UserPage() {
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+
   return (
     <>
       <Helmet>
@@ -155,10 +162,12 @@ export default function UserPage() {
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            User
+            Usuario
           </Typography>
-          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}>
-            New User
+          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}
+          onClick={handleOpenModal}
+          >
+            Nuevo Usuario
           </Button>
         </Stack>
 
@@ -232,13 +241,13 @@ export default function UserPage() {
                           }}
                         >
                           <Typography variant="h6" paragraph>
-                            Not found
+                            Sin resultados
                           </Typography>
 
                           <Typography variant="body2">
-                            No results found for &nbsp;
+                            No existen resultados para  &nbsp;
                             <strong>&quot;{filterName}&quot;</strong>.
-                            <br /> Try checking for typos or using complete words.
+                            <br /> Intenta verificar errores tipográficos o buscar por otra palabra.
                           </Typography>
                         </Paper>
                       </TableCell>
@@ -281,12 +290,12 @@ export default function UserPage() {
       >
         <MenuItem>
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          Edit
+          Editar
         </MenuItem>
 
         <MenuItem sx={{ color: 'error.main' }}>
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-          Delete
+          Eliminar
         </MenuItem>
       </Popover>
     </>
