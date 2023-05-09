@@ -27,12 +27,10 @@ import DeleteUser from './userPages/DeleteUser';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Nombre', alignRight: false },
-  { id: 'company', label: 'Empresa', alignRight: false },
-  { id: 'role', label: 'Rol', alignRight: false },
-  { id: 'isVerified', label: 'Verificado', alignRight: false },
-  { id: 'status', label: 'Status', alignRight: false },
-  { id: '' },
+  { id: 'nombre', label: 'Nombre', alignRight: false },
+  { id: 'apellido', label: 'Apellido', alignRight: false },
+  { id: 'correo', label: 'Correo', alignRight: false },
+  { id: 'estado', label: 'Estado', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -206,8 +204,6 @@ export default function UserPage() {
                         <TableCell align="left">{company}</TableCell>
 
                         <TableCell align="left">{role}</TableCell>
-
-                        <TableCell align="left">{isVerified ? 'Yes' : 'No'}</TableCell>
 
                         <TableCell align="left">
                           <Label color={(status === 'banned' && 'error') || 'success'}>{sentenceCase(status)}</Label>
