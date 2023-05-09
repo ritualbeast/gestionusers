@@ -1,14 +1,18 @@
+
 import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
 import { sentenceCase } from 'change-case';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 // @mui
 import {Card,Table,  Stack,  Paper, Avatar,  Button,
   Popover,  Checkbox,  TableRow,  MenuItem,
   Modal,  TableBody,  TableCell,  Container,
-  Typography,  IconButton, TableContainer, TablePagination, Box, Dialog
-
+  Typography,  IconButton, TableContainer, TablePagination, Box
 } from '@mui/material';
+import CloseIcon from '@material-ui/icons/Close';
+
+  
+import {UserProviders, UserContext } from '../context/UserProviders';
 // components
 import Label from '../components/label';
 import Iconify from '../components/iconify';
@@ -19,6 +23,7 @@ import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
 import DeleteUser from './userPages/DeleteUser';
+
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -71,10 +76,7 @@ export default function UserPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openModal, setOpenModal] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
-
   
-
-
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
   };
@@ -295,20 +297,28 @@ export default function UserPage() {
           Eliminar
         </MenuItem>
       </Popover>
-
       <Modal
         open={openModal}
         onClose={handleCloseModal}
-        sx={{
+      >
+        <Box sx={{
+          width: '80%',
+          height: '80%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-        }}
-      >
-        <Box sx={{ width: '50%' }}>
-          <CreateUser />
+          margin: 'auto',
+          marginTop: '5%',
+        }}>
+          <IconButton onClick={handleCloseModal} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
+          <CloseIcon />
+        </IconButton>
+            <CreateUser />
         </Box>
       </Modal>
+
+
+
 
       <Modal
         open={openEliminar}
