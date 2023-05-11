@@ -1,25 +1,23 @@
 
 import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
-import { useContext, useState } from 'react';
+import {  useState, useEffect } from 'react';
 // @mui
 import {Card,Table,  Stack,  Paper, Avatar,  Button,
   Popover,  Checkbox,  TableRow,  MenuItem,
   Modal,  TableBody,  TableCell,  Container,
-  Typography,  IconButton, TableContainer, TablePagination, Box
+  Typography,  IconButton, TableContainer, TablePagination, Box, Menu
 } from '@mui/material';
 
 import { Row, Col } from 'react-bootstrap';
 import CloseIcon from '@material-ui/icons/Close';
-import {UserProviders, UserContext } from '../context/UserProviders';
 // components
-import Label from '../components/label';
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
-import UseUser from '../hooks/UseUser';
+
+import {Userservices} from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
@@ -78,6 +76,7 @@ export default function UserPage() {
   const [openModal, setOpenModal] = useState(false);
   const [openModificar, setOpenModificar] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
+  const [datosUser, setDatosUser] = useState([]);
 
   
   
@@ -160,6 +159,15 @@ export default function UserPage() {
     setOpenModificar(false);
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await Userservices();
+      console.log(response.data);
+      setDatosUser(response.data);
+    };
+    fetchData();
+  }, []);
+
 
   return (
     <>
@@ -172,6 +180,7 @@ export default function UserPage() {
           <Typography variant="h4" gutterBottom>
             Usuario
           </Typography>
+          
           <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}
           onClick={handleOpenModal}
           >
@@ -194,49 +203,23 @@ export default function UserPage() {
                   onRequestSort={handleRequestSort}
                   onSelectAllClick={handleSelectAllClick}
                 />
+
                 <TableBody>
-                  {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                    const { id, name, role, status, company, avatarUrl, isVerified } = row;
-                    const selectedUser = selected.indexOf(name) !== -1;
-
-                    return (
-                      <TableRow hover key={id} tabIndex={-1} role="checkbox" selected={selectedUser}>
-                        <TableCell padding="checkbox">
-                          <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
-                        </TableCell>
-
-                        <TableCell component="th" scope="row" padding="none">
-                          <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar alt={name} src={avatarUrl} />
-                            <Typography variant="subtitle2" noWrap>
-                              {name}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
-
-                        <TableCell align="left">{company}</TableCell>
-
-                        <TableCell align="left">{role}</TableCell>
-
-                        <TableCell align="left">
-                          <Label color={(status === 'banned' && 'error') || 'success'}>{sentenceCase(status)}</Label>
-                        </TableCell>
-
-                        <TableCell align="right">
-                          <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
-                            <Iconify icon={'eva:more-vertical-fill'} />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 53 * emptyRows }}>
-                      <TableCell colSpan={6} />
+                  {Array.isArray(datosUser) && datosUser.map(user => (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.id}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell align="center">
+                        <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
+                          <Iconify icon={'eva:more-vertical-fill'} />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
-
                 {isNotFound && (
                   <TableBody>
                     <TableRow>
@@ -276,10 +259,10 @@ export default function UserPage() {
         </Card>
       </Container>
 
-      <Popover
+      <Menu
         open={Boolean(open)}
-        anchorEl={open}
         onClose={handleCloseMenu}
+        anchorEl={open}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         PaperProps={{
@@ -294,9 +277,7 @@ export default function UserPage() {
           },
         }}
       >
-        <MenuItem
-          onClick={handleOpenModificar}
-        >
+        <MenuItem onClick={handleOpenModificar}>
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
           Editar
         </MenuItem>
@@ -305,8 +286,8 @@ export default function UserPage() {
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
           Eliminar
         </MenuItem>
+      </Menu>
 
-      </Popover>
 
 
       
@@ -314,15 +295,22 @@ export default function UserPage() {
       <Modal
         open={openModal}
         onClose={handleCloseModal}
-      >
-        <Box sx={{
-          width: '80%',
-          height: '80%',
+        sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: 'auto',
-          marginTop: '5%',
+        }}
+      >
+        <Box sx={{
+          width: '90%',
+          maxWidth: '600px',
+          maxHeight: '80vh',
+          p: '1rem',
+          bgcolor: '#f7f7f7',
+          borderRadius: '4px',
+          boxShadow: '0 0 20px rgba(0, 0, 0, 0.2)',
+          overflowY: 'auto',
+          
         }}>
           <IconButton onClick={handleCloseModal} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
           <CloseIcon />
@@ -334,22 +322,29 @@ export default function UserPage() {
       <Modal
         open={openModificar}
         onClose={handleCloseModificar}
-      >
-        <Box sx={{
-          width: '80%',
-          height: '80%',
+        sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: 'auto',
-          marginTop: '5%',
+        }}
+      >
+        <Box sx={{
+          width: '90%',
+          maxWidth: '600px',
+          maxHeight: '80vh',
+          p: '1rem',
+          bgcolor: '#f7f7f7',
+          borderRadius: '4px',
+          boxShadow: '0 0 20px rgba(0, 0, 0, 0.2)',
+          overflowY: 'auto',
         }}>
           <IconButton onClick={handleCloseModificar} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
-          <CloseIcon />
-        </IconButton>
-            <ModificarUser />
+            <CloseIcon />
+          </IconButton>
+          <ModificarUser />
         </Box>
       </Modal>
+
 
 
 

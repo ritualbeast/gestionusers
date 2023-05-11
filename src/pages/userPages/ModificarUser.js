@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../styles/modificaruser.css';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
-
+import PersonIcon from '@material-ui/icons/Person';
 
 const ModificarUser = () => {
   const [formState, setFormState] = useState({
@@ -17,11 +17,6 @@ const ModificarUser = () => {
     Estado: '',
   });
 
-  const [botonCancelar, setBotonCancelar] = useState('');
-
-  const handleCancel = (e) => {
-    e.preventDefault();
-  };
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
@@ -35,7 +30,8 @@ const ModificarUser = () => {
     <Container >
       <Row className="justify-content-center">
         <Col>
-          <h2>Crear nuevo Usuario</h2>
+          < PersonIcon  style={{ width: 50, height: 50 }}/>
+          <h2>Editar Usuario</h2>
           <Form onSubmit={handleSubmit}>
             <Row>
               <Col md={6}>
