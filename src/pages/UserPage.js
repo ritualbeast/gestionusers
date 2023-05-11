@@ -9,9 +9,9 @@ import {Card,Table,  Stack,  Paper, Avatar,  Button,
   Modal,  TableBody,  TableCell,  Container,
   Typography,  IconButton, TableContainer, TablePagination, Box
 } from '@mui/material';
-import CloseIcon from '@material-ui/icons/Close';
 
-  
+import { Row, Col } from 'react-bootstrap';
+import CloseIcon from '@material-ui/icons/Close';
 import {UserProviders, UserContext } from '../context/UserProviders';
 // components
 import Label from '../components/label';
@@ -19,12 +19,15 @@ import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
+import UseUser from '../hooks/UseUser';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
-import DeleteUser from './userPages/DeleteUser';
+import ModificarUser from './userPages/ModificarUser';
 
 // ----------------------------------------------------------------------
+
+import '../styles/deleteuser.css';
 
 const TABLE_HEAD = [
   { id: 'nombre', label: 'Nombre', alignRight: false },
@@ -73,7 +76,10 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openModal, setOpenModal] = useState(false);
+  const [openModificar, setOpenModificar] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
+
+  
   
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -145,6 +151,13 @@ export default function UserPage() {
 
   const handleCloseModal = () => {
     setOpenModal(false);
+  };
+  const handleOpenModificar = () => {
+    setOpenModificar(true);
+  };
+
+  const handleCloseModificar = () => {
+    setOpenModificar(false);
   };
 
 
@@ -281,18 +294,23 @@ export default function UserPage() {
           },
         }}
       >
-        <MenuItem>
+        <MenuItem
+          onClick={handleOpenModificar}
+        >
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
           Editar
         </MenuItem>
 
-        <MenuItem sx={{ color: 'error.main' }}
-          onClick={handleOpenEliminar}
-        >
+        <MenuItem sx={{ color: 'error.main' }} onClick={handleOpenEliminar}>
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
           Eliminar
         </MenuItem>
+
       </Popover>
+
+
+      
+
       <Modal
         open={openModal}
         onClose={handleCloseModal}
@@ -313,20 +331,51 @@ export default function UserPage() {
         </Box>
       </Modal>
 
+      <Modal
+        open={openModificar}
+        onClose={handleCloseModificar}
+      >
+        <Box sx={{
+          width: '80%',
+          height: '80%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: 'auto',
+          marginTop: '5%',
+        }}>
+          <IconButton onClick={handleCloseModificar} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
+          <CloseIcon />
+        </IconButton>
+            <ModificarUser />
+        </Box>
+      </Modal>
+
 
 
 
       <Modal
         open={openEliminar}
         onClose={handleCloseEliminar}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+        sx={{width: '60%',height: '60%', display: 'flex',alignItems: 'center',justifyContent: 'center',margin: 'auto', marginTop: '5%',
         }}
       >
         <Box sx={{ width: '50%' }}>
-          <DeleteUser />
+        <Container>
+          <Row>
+            <Col>
+              Desea eliminar el usuario?
+            </Col>
+            <Col>
+              <Button className='buttondeleteuser' variant="contained" color="primary" onClick={() => setOpen(true)}>
+                Eliminar
+              </Button>
+              <Button className='buttondeleteuser' variant="contained" color="primary" onClick={handleCloseEliminar}>
+                Cancelar
+              </Button>
+            </Col>
+          </Row>  
+        </Container>
         </Box>
       </Modal>
     </>
