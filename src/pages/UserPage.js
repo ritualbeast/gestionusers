@@ -77,7 +77,22 @@ export default function UserPage() {
   const [openModificar, setOpenModificar] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
   const [datosUser, setDatosUser] = useState([]);
+  const [datosaEliminar, setDatosaEliminar] = useState([]);
 
+  // funcion para eliminar usuario por id
+  const eliminarUsuario = async (id) => {
+    const response = await fetch(`http://localhost:3001/usuarios/${id}`, {
+      method: 'DELETE',
+    });
+    console.log(response);
+    window.location.reload();
+  };
+
+  // capturar un id especifico para eliminar
+  const capturarId = (id) => {
+    setDatosaEliminar(id);
+    console.log(id);
+  };
   
   
   const handleOpenMenu = (event) => {
@@ -168,6 +183,8 @@ export default function UserPage() {
     fetchData();
   }, []);
 
+  
+
 
   return (
     <>
@@ -250,7 +267,7 @@ export default function UserPage() {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={USERLIST.length}
+            count={datosUser.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -287,10 +304,6 @@ export default function UserPage() {
           Eliminar
         </MenuItem>
       </Menu>
-
-
-
-      
 
       <Modal
         open={openModal}
@@ -344,11 +357,6 @@ export default function UserPage() {
           <ModificarUser />
         </Box>
       </Modal>
-
-
-
-
-
       <Modal
         open={openEliminar}
         onClose={handleCloseEliminar}
@@ -362,7 +370,8 @@ export default function UserPage() {
               Desea eliminar el usuario?
             </Col>
             <Col>
-              <Button className='buttondeleteuser' variant="contained" color="primary" onClick={() => setOpen(true)}>
+              <Button className='buttondeleteuser' variant="contained" color="primary" 
+              onClick={capturarId}>
                 Eliminar
               </Button>
               <Button className='buttondeleteuser' variant="contained" color="primary" onClick={handleCloseEliminar}>

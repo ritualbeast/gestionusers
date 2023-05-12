@@ -25,6 +25,9 @@
   cursor: pointer;
   margin-top: 1%;
 }
+.formuser{
+  text-align: left;
+}
 
 .btn-primary:hover {
   background-color: #0069d9;

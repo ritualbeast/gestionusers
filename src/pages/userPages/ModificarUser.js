@@ -35,7 +35,7 @@ const ModificarUser = () => {
           <Form onSubmit={handleSubmit}>
             <Row>
               <Col md={6}>
-                <Form.Group controlId="firstName">
+              <Form.Group className='formuser' controlId="firstName">
                   <Form.Label>Nombres</Form.Label>
                   <Form.Control
                     type="text"
@@ -46,7 +46,7 @@ const ModificarUser = () => {
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group controlId="lastName">
+                <Form.Group className='formuser' controlId="lastName">
                   <Form.Label>Apellidos</Form.Label>
                   <Form.Control
                     type="text"
@@ -58,7 +58,7 @@ const ModificarUser = () => {
               </Col>
             </Row>
 
-            <Form.Group controlId="email">
+            <Form.Group className='formuser' controlId="email">
               <Form.Label>Correo Electronico</Form.Label>
               <Form.Control
                 type="email"
@@ -68,7 +68,7 @@ const ModificarUser = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="phone">
+            <Form.Group className='formuser' controlId="phone">
               <Form.Label>Telefono</Form.Label>
               <Form.Control
                 type="text"
@@ -78,7 +78,7 @@ const ModificarUser = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="user">
+            <Form.Group className='formuser' controlId="user">
               <Form.Label>Usuario</Form.Label>
               <Form.Control
                 type="text"
@@ -88,7 +88,7 @@ const ModificarUser = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="password">
+            <Form.Group className='formuser' controlId="password">
               <Form.Label>Contraseña</Form.Label>
               <Form.Control
                 type="password"
@@ -98,7 +98,7 @@ const ModificarUser = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="company">
+            <Form.Group className='formuser' controlId="company">
               <Form.Label>Empresa</Form.Label>
               <Form.Control
                 type="text"
@@ -108,7 +108,7 @@ const ModificarUser = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="identificationType">
+            <Form.Group className='formuser' controlId="identificationType">
               <Form.Label>Tipo de Identificacion</Form.Label>
               <Form.Control
                 as="select"
@@ -122,7 +122,7 @@ const ModificarUser = () => {
               </Form.Control>
             </Form.Group>
 
-            <Form.Group controlId="identification">
+            <Form.Group className='formuser' controlId="identification">
               <Form.Label>Identificacion</Form.Label>
               <Form.Control
 
@@ -133,7 +133,7 @@ const ModificarUser = () => {
               />
             </Form.Group>
 
-            <Form.Group controlId="status">
+            <Form.Group className='formuser' controlId="status">
               <Form.Label>Estado</Form.Label>
               <Form.Control
                 as="select"
@@ -146,6 +146,7 @@ const ModificarUser = () => {
               </Form.Control>
             </Form.Group>
 
+
             <Row className="justify-content-center">
               <Col md={4}>
                 <Button
@@ -154,7 +155,7 @@ const ModificarUser = () => {
                   type="submit"
                   className="btn-block"
                 >
-                  Crear
+                  Modificar
                 </Button>
               </Col>
               
