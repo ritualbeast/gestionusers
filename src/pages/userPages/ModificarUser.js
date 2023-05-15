@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import '../../styles/modificaruser.css';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import PersonIcon from '@material-ui/icons/Person';
+import Empresas from '../../_mock/empresas';
+
 
 const ModificarUser = () => {
   const [formState, setFormState] = useState({
@@ -101,11 +103,16 @@ const ModificarUser = () => {
             <Form.Group className='formuser' controlId="company">
               <Form.Label>Empresa</Form.Label>
               <Form.Control
-                type="text"
+                as="select" // cambia el tipo de input a select
                 name="Empresa"
                 value={formState.Empresa}
                 onChange={handleChange}
-              />
+                required
+              >
+                {Empresas.map((empresa) => (
+                  <option key={empresa.nombre} value={empresa.nombre}>{empresa.nombre}</option>
+                ))}
+              </Form.Control>
             </Form.Group>
 
             <Form.Group className='formuser' controlId="identificationType">

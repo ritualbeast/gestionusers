@@ -11,8 +11,6 @@
 
 .form-control {
   padding: 1%;
-  border-radius: 5px;
-  border: 1px solid #ccc;
   width: 100%;
 }
 
@@ -30,10 +28,22 @@
 }
 
 .btn-primary:hover {
-  background-color: #0069d9;
+  background-color: #784cf1;
   
 }
 .form-label {
   font-weight: bold;
   font-size: 15px;
+}
+.btnblock{
+  padding: 5%;
+  background-color: rgb(42, 26, 217);
+  width: 100%;
+}
+
+.required-asterisk {
+  color: red;
+}
+.incompleto input {
+  border-color: red !important;
 }

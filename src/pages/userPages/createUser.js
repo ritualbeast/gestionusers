@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../../styles/createuser.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import PersonIcon from '@material-ui/icons/Person';
 import { includes } from 'lodash';
@@ -8,6 +10,20 @@ import Empresas from '../../_mock/empresas';
 const CreateUser = () => {
 
   const [error, setError] = useState("");
+  const [camposIncompletos, setCamposIncompletos] = useState([]);
+  const notify = () => toast.error('Porfavor ingrese los campos obligatorios', {
+    position: "top-right",
+    autoClose: 2000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    style: {
+      fontSize: '11px' // Tamaño de letra deseado
+    }
+    });
 
   const [formState, setFormState] = useState({
     
@@ -27,28 +43,32 @@ const CreateUser = () => {
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
-    // espacios en blanco
-    if (e.target.name === "Nombres") {
-
-      if (e.target.value.includes(" ")) {
-        setError("Sin espacios en blanco");
-      }
-      else {
-        setError(false)
-      }
-    }
-
-
+    
+    
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
+    
+    if (formState.name.trim() === "") {
+      toast.error('Por favor ingrese los campos obligatorios', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        style: {
+          fontSize: '11px' // Tamaño de letra deseado
+        }
+      });
+    } else {
       try {
         const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
           method: 'POST',
           body: JSON.stringify({
-
             title: formState.title,
             body: formState.body,
             userId: formState.userId,
@@ -56,33 +76,15 @@ const CreateUser = () => {
           headers: {
             'Content-type': 'application/json; charset=UTF-8',
           },
-        })
-          .then((response) => response.json())
-          .then((json) => console.log(json));
+        });
+        const json = await response.json();
+        console.log(json);
       } catch (error) {
         console.log(error);
       }
-      setError(false)
+      setError(false);
     }
-
   };
-
-  const validateForm = () => {
-    const { Nombres, Apellidos, Correo, Telefono, Usuario, Contraseña, Empresa, Identificacion } = formState;
-  
-     // Verificar si se ingresó un número en campo de texto
-    const letras = /^[a-zA-Z]+$/; // Expresión regular que verifica que la cadena sólo contenga letras
-    if (!letras.test(Nombres) || !letras.test(Apellidos) || !letras.test(Empresa)) {
-      setError(" Por favor, ingrese solo letras en los campos correspondientes");
-       return false;
-     }
-     // Validar otros criterios de validación si es necesario
-      return true;
-  };
-
-
-  
-
 
   return (
     <Container >
@@ -90,72 +92,67 @@ const CreateUser = () => {
         <Col>
           < PersonIcon  style={{ width: 50, height: 50 }}/>
           <h2>Crear nuevo Usuario</h2>
+          
           <Form onSubmit={handleSubmit}>
-            
-              <Form.Group className='formuser' controlId="firstName">
-                  <Form.Label>Nombres</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="Nombres"
-                    value={formState.Nombres}
-                    onChange={handleChange}
-                    required
-                    isInvalid={!!error} // Para marcar el campo en rojo si hay un error
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {error}
-                  </Form.Control.Feedback>
+          
+          <Form.Group  className='formuser' controlId="firstName">
+            <Form.Label>Nombres</Form.Label>
+            <Form.Control
+              type="text"
+              name="Nombres"
+              value={formState.Nombres}
+              onChange={handleChange}
+              required
+              
+            />
+          </Form.Group>
 
-                </Form.Group>
-            
                 <Form.Group className='formuser' controlId="lastName">
-                  <Form.Label>Apellidos</Form.Label>
+                  <Form.Label>Apellidos  <span className="required-asterisk">*</span></Form.Label>
                   <Form.Control
                     type="text"
                     name="Apellidos"
                     value={formState.Apellidos}
                     onChange={handleChange}
                     
-                    required
                   />
                 </Form.Group>
               
 
             <Form.Group className='formuser' controlId="email">
-              <Form.Label>Correo Electronico</Form.Label>
+              <Form.Label>Correo Electronico  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="email"
                 name="Correo"
                 value={formState.Correo}
                 onChange={handleChange}
-                required
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="phone">
-              <Form.Label>Telefono</Form.Label>
+              <Form.Label>Telefono  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="text"
                 name="Telefono"
                 value={formState.Telefono}
                 onChange={handleChange}
-                required
+                
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="user">
-              <Form.Label>Usuario</Form.Label>
+              <Form.Label>Usuario  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="text"
                 name="Usuario"
                 value={formState.Usuario}
                 onChange={handleChange}
-                required
+                
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="password">
-              <Form.Label>Contraseña</Form.Label>
+              <Form.Label>Contraseña  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="password"
                 name="Contraseña"
@@ -166,7 +163,7 @@ const CreateUser = () => {
             </Form.Group>
 
             <Form.Group className='formuser' controlId="company">
-              <Form.Label>Empresa</Form.Label>
+              <Form.Label>Empresa  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 as="select" // cambia el tipo de input a select
                 name="Empresa"
@@ -209,7 +206,7 @@ const CreateUser = () => {
             </Form.Group>
 
             <Form.Group className='formuser' controlId="status">
-              <Form.Label>Estado</Form.Label>
+              <Form.Label>Estado  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 as="select"
                 name="Estado"
@@ -236,17 +233,13 @@ const CreateUser = () => {
                 </Alert>
               </div>
             }
-
-
-
-
             <Row className="justify-content-center">
               <Col md={4}>
                 <Button
 
                   variant="primary"
                   type="submit"
-                  className="btn-block"
+                  className="btnblock"
                 >
                   Crear
                 </Button>
@@ -254,6 +247,7 @@ const CreateUser = () => {
               
             </Row>
           </Form>
+          <ToastContainer />
         </Col>
       </Row>
     </Container>

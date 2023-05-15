@@ -1,7 +1,7 @@
 
 import { Helmet } from 'react-helmet-async';
 import { filter } from 'lodash';
-import {  useState, useEffect } from 'react';
+import {  useState, useEffect, useContext } from 'react';
 // @mui
 import {Card,Table,  Stack,  Paper, Avatar,  Button,
   Popover,  Checkbox,  TableRow,  MenuItem,
@@ -17,11 +17,12 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import {Userservices} from '../services/Userservices';
+import {deleteUser, Userservices, LoginToken, ConsultaUsuarios } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
 import ModificarUser from './userPages/ModificarUser';
+
 
 // ----------------------------------------------------------------------
 
@@ -78,6 +79,7 @@ export default function UserPage() {
   const [openEliminar, setOpenEliminar] = useState(false);
   const [datosUser, setDatosUser] = useState([]);
   const [datosaEliminar, setDatosaEliminar] = useState([]);
+  
 
   // funcion para eliminar usuario por id
   const eliminarUsuario = async (id) => {
@@ -182,6 +184,26 @@ export default function UserPage() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await LoginToken();
+        console.log(localStorage.getItem('token'));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  
+
+  
+  
+
+  
+
 
   
 
