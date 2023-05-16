@@ -9,7 +9,7 @@ import {Card,Table,  Stack,  Paper, Avatar,  Button,
   Typography,  IconButton, TableContainer, TablePagination, Box, Menu
 } from '@mui/material';
 
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col, Tab } from 'react-bootstrap';
 import CloseIcon from '@material-ui/icons/Close';
 // components
 import Iconify from '../components/iconify';
@@ -17,7 +17,7 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import {deleteUser, Userservices, LoginToken, ConsultaUsuarios } from '../services/Userservices';
+import {deleteUser, Userservices, LoginToken, ConsultaUsuarios, ValidarToken } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
@@ -179,8 +179,8 @@ export default function UserPage() {
   useEffect(() => {
     const fetchData = async () => {
       const response = await Userservices();
-      console.log(response.data);
       setDatosUser(response.data);
+      
     };
     fetchData();
   }, []);
@@ -189,7 +189,6 @@ export default function UserPage() {
     const fetchData = async () => {
       try {
         const response = await LoginToken();
-        console.log(localStorage.getItem('token'));
       } catch (error) {
         console.error(error);
       }
@@ -197,17 +196,22 @@ export default function UserPage() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    
+    fetchData();
+
+  }, []);
   
 
+  const fetchData = async () => {
+    try {
+      const response = await ConsultaUsuarios();
+      setDatosUser(response.data.row);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   
-  
-
-  
-
-
-  
-
-
   return (
     <>
       <Helmet>
@@ -244,13 +248,15 @@ export default function UserPage() {
                 />
 
                 <TableBody>
-                  {Array.isArray(datosUser) && datosUser.map(user => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.id}</TableCell>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.username}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.email}</TableCell>
+                  {Array.isArray(datosUser) && datosUser.map((user, index) => (
+                    <TableRow key={user.idUsuario}>
+                      <TableCell> 
+                        {index + 1}
+                      </TableCell>
+                      <TableCell>{user.nombres}</TableCell>
+                      <TableCell>{user.apellidos}</TableCell>
+                      <TableCell>{user.correo}</TableCell>
+                      <TableCell>{user.estado}</TableCell>
                       <TableCell align="center">
                         <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
                           <Iconify icon={'eva:more-vertical-fill'} />
