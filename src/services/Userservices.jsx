@@ -71,8 +71,10 @@ const ValidarToken = async (info) => {
 
 const ConsultaUsuarios = async (info) => {
   try {
+
     const tokenUsuario = localStorage.getItem('tokenValidado');
     const idUsuario = localStorage.getItem('data');
+   
     const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
@@ -84,7 +86,7 @@ const ConsultaUsuarios = async (info) => {
       method: 'GET',
       headers,
     };
-    const response = await fetch('http://desa.goitsa.me:8988/goit-security-api/v2/usuario/consultaUsuarios/N/A/?pagina=1&size=39', requestOptions);
+    const response = await fetch('http://desa.goitsa.me:8988/goit-security-api/v2/usuario/consultaUsuarios/N/a/?pagina=1&size=39', requestOptions);
     const data = await response.json();
     console.log(data);
     

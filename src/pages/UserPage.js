@@ -1,16 +1,17 @@
 
 import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
+import { filter, set } from 'lodash';
 import {  useState, useEffect, useContext } from 'react';
 // @mui
-import {Card,Table,  Stack,  Paper, Avatar,  Button,
+import {Card,Table,  Stack,  Paper, Avatar,  Button, InputLabel,
   Popover,  Checkbox,  TableRow,  MenuItem,
   Modal,  TableBody,  TableCell,  Container,
-  Typography,  IconButton, TableContainer, TablePagination, Box, Menu
+  Typography,  IconButton, TableContainer, TablePagination, Box, Menu, Select, FormControl, FormControlLabel, FormGroup
 } from '@mui/material';
 
 import { Row, Col, Tab } from 'react-bootstrap';
 import CloseIcon from '@material-ui/icons/Close';
+import FilterListIcon from '@material-ui/icons/FilterList';
 // components
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
@@ -61,7 +62,9 @@ function applySortFilter(array, comparator, query) {
     return a[1] - b[1];
   });
   if (query) {
-    return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    return filter(stabilizedThis.map((el) => el[0]), (_user) =>
+      _user.nombres.toLowerCase().indexOf(query.toLowerCase()) !== -1
+    );
   }
   return stabilizedThis.map((el) => el[0]);
 }
@@ -79,23 +82,20 @@ export default function UserPage() {
   const [openEliminar, setOpenEliminar] = useState(false);
   const [datosUser, setDatosUser] = useState([]);
   const [datosaEliminar, setDatosaEliminar] = useState([]);
-  
+  const [isSelectUsed, setIsSelectUsed] = useState(false);
+  const [isToolbarUsed, setIsToolbarUsed] = useState(false);
+  const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
 
-  // funcion para eliminar usuario por id
-  const eliminarUsuario = async (id) => {
-    const response = await fetch(`http://localhost:3001/usuarios/${id}`, {
-      method: 'DELETE',
-    });
-    console.log(response);
-    window.location.reload();
-  };
 
-  // capturar un id especifico para eliminar
-  const capturarId = (id) => {
-    setDatosaEliminar(id);
-    console.log(id);
-  };
-  
+
+
+  const [checkedItems, setCheckedItems] = useState({
+    nombres: '',
+    apellidos: '',
+    correo: '',
+    estado: '',
+  });
+
   
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -153,11 +153,12 @@ export default function UserPage() {
   const handleFilterByName = (event) => {
     setPage(0);
     setFilterName(event.target.value);
+    setIsToolbarUsed(true);
   };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
 
-  const filteredUsers = applySortFilter(USERLIST, getComparator(order, orderBy), filterName);
+  const filteredUsers = applySortFilter(datosUser, getComparator(order, orderBy), filterName);
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
@@ -211,6 +212,23 @@ export default function UserPage() {
       console.error(error);
     }
   };
+
+  // funcion para recoger datos del filtro y enviarlos a la api
+  const handleFiltrar = async () => {
+
+    try {
+      const response = await ConsultaUsuarios(filterName);
+      setDatosUser(response.data.row);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCheckboxChange = (event) => {
+    setCheckedItems({ ...checkedItems, [event.target.name]: event.target.checked });
+    setIsSelectUsed(true);
+  };
+
   
   return (
     <>
@@ -232,7 +250,44 @@ export default function UserPage() {
         </Stack>
 
         <Card>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
+          
+          <FormControl variant="outlined"  style={{ width: '20%' }}>
+            <InputLabel id="select-label">Filtrar por</InputLabel>
+            <Select
+              labelId="select-label"
+              multiple = {false}
+              value={Object.keys(checkedItems).filter((item) => checkedItems[item])}
+              onChange={handleCheckboxChange}
+              renderValue={(selected) => selected.join(', ')}
+            >
+              <MenuItem value="nombres">
+                <Checkbox checked={checkedItems.nombres} onChange={handleCheckboxChange} name="nombres" />
+                <InputLabel>Nombres</InputLabel>
+              </MenuItem>
+              <MenuItem value="correo">
+                <Checkbox checked={checkedItems.correo} onChange={handleCheckboxChange} name="correo" />
+                <InputLabel>Correo</InputLabel>
+              </MenuItem>
+              <MenuItem value="estado">
+                <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" />
+                <InputLabel>Estado</InputLabel>
+              </MenuItem>
+            </Select>
+          </FormControl>
+          
+
           <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+
+
+          <Button style={{ margin : '0 0 0 1rem' }}
+          variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleFiltrar} disabled={isButtonDisabled}>
+            Filtrar
+          </Button>
+        </div>
+
+
+
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
@@ -398,8 +453,7 @@ export default function UserPage() {
               Desea eliminar el usuario?
             </Col>
             <Col>
-              <Button className='buttondeleteuser' variant="contained" color="primary" 
-              onClick={capturarId}>
+              <Button className='buttondeleteuser' variant="contained" color="primary">
                 Eliminar
               </Button>
               <Button className='buttondeleteuser' variant="contained" color="primary" onClick={handleCloseEliminar}>
