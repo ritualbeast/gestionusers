@@ -11,14 +11,13 @@ import {Card,Table,  Stack,  Paper, Avatar,  Button, InputLabel,
 
 import { Row, Col, Tab } from 'react-bootstrap';
 import CloseIcon from '@material-ui/icons/Close';
-import FilterListIcon from '@material-ui/icons/FilterList';
 // components
 import Iconify from '../components/iconify';
 import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import {deleteUser, Userservices, LoginToken, ConsultaUsuarios, ValidarToken } from '../services/Userservices';
+import {deleteUser, LoginToken, ConsultaUsuarios, ValidarToken } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
@@ -85,13 +84,13 @@ export default function UserPage() {
   const [isSelectUsed, setIsSelectUsed] = useState(false);
   const [isToolbarUsed, setIsToolbarUsed] = useState(false);
   const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
+  
 
 
 
 
   const [checkedItems, setCheckedItems] = useState({
     nombres: '',
-    apellidos: '',
     correo: '',
     estado: '',
   });
@@ -162,8 +161,8 @@ export default function UserPage() {
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
-  const handleOpenModal = () => {
-    setOpenModal(true);
+  const handleOpenModal = (opcion) => {
+    setOpenModal(opcion);
   };
 
   const handleCloseModal = () => {
@@ -177,15 +176,7 @@ export default function UserPage() {
     setOpenModificar(false);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await Userservices();
-      setDatosUser(response.data);
-      
-    };
-    fetchData();
-  }, []);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -212,12 +203,12 @@ export default function UserPage() {
       console.error(error);
     }
   };
-
+  const [valorcheck, setValorcheck] = useState([]);
   // funcion para recoger datos del filtro y enviarlos a la api
   const handleFiltrar = async () => {
 
     try {
-      const response = await ConsultaUsuarios(filterName);
+      const response = await ConsultaUsuarios(filterName, valorcheck);
       setDatosUser(response.data.row);
     } catch (error) {
       console.error(error);
@@ -225,25 +216,37 @@ export default function UserPage() {
   };
 
   const handleCheckboxChange = (event) => {
-    setCheckedItems({ ...checkedItems, [event.target.name]: event.target.checked });
+    const { name, checked } = event.target;
     setIsSelectUsed(true);
+    if (checked) {
+      setCheckedItems({ ...checkedItems, [name]: true });
+    } else {
+      const { [name]: _, ...updatedCheckedItems } = checkedItems;
+      setCheckedItems(updatedCheckedItems);
+    }
+    
+    const selectedValues = Object.keys(checkedItems).filter((item) => checkedItems[item]);
+    setValorcheck(selectedValues);
   };
-
   
+  
+
   return (
     <>
+       
       <Helmet>
         <title> User | Minimal UI </title>
       </Helmet>
       
       <Container>
+
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
             Usuario
           </Typography>
           
           <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}
-          onClick={handleOpenModal}
+          onClick={()=>handleOpenModal(true)}
           >
             Nuevo Usuario
           </Button>
@@ -261,16 +264,16 @@ export default function UserPage() {
               onChange={handleCheckboxChange}
               renderValue={(selected) => selected.join(', ')}
             >
-              <MenuItem value="nombres">
-                <Checkbox checked={checkedItems.nombres} onChange={handleCheckboxChange} name="nombres" />
+              <MenuItem >
+                <Checkbox checked={checkedItems.nombres} onChange={handleCheckboxChange} name="nombres" value='N' />
                 <InputLabel>Nombres</InputLabel>
               </MenuItem>
-              <MenuItem value="correo">
-                <Checkbox checked={checkedItems.correo} onChange={handleCheckboxChange} name="correo" />
+              <MenuItem >
+                <Checkbox checked={checkedItems.correo} onChange={handleCheckboxChange} name="correo" value='C' />
                 <InputLabel>Correo</InputLabel>
               </MenuItem>
-              <MenuItem value="estado">
-                <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" />
+              <MenuItem >
+                <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" value='E' />
                 <InputLabel>Estado</InputLabel>
               </MenuItem>
             </Select>
@@ -281,14 +284,10 @@ export default function UserPage() {
 
 
           <Button style={{ margin : '0 0 0 1rem' }}
-          variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} onClick={handleFiltrar} disabled={isButtonDisabled}>
+          variant="contained"  onClick={handleFiltrar} disabled={isButtonDisabled}>
             Filtrar
           </Button>
         </div>
-
-
-
-
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
               <Table>
@@ -411,7 +410,9 @@ export default function UserPage() {
           <IconButton onClick={handleCloseModal} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
           <CloseIcon />
         </IconButton>
-            <CreateUser />
+            <CreateUser  
+             handleCloseModal={handleCloseModal}
+             />
         </Box>
       </Modal>
 

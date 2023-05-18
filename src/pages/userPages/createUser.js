@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../styles/createuser.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -6,84 +6,90 @@ import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import PersonIcon from '@material-ui/icons/Person';
 import { includes } from 'lodash';
 import Empresas from '../../_mock/empresas';
+import { CrearUsuario } from '../../services/Userservices';
 
-const CreateUser = () => {
-
+const CreateUser = ({handleCloseModal}) => {
   const [error, setError] = useState("");
   const [camposIncompletos, setCamposIncompletos] = useState([]);
-  const notify = () => toast.error('Porfavor ingrese los campos obligatorios', {
-    position: "top-right",
-    autoClose: 2000,
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-    style: {
-      fontSize: '11px' // Tamaño de letra deseado
-    }
-    });
-
   const [formState, setFormState] = useState({
-    
-    Nombres: '', 
-    Apellidos: '',
-    Correo: '',
-    Telefono: '',
-    Usuario: '',
-    Contraseña: '',
-    Empresa: '',
-    TipodeIdentificacion: '',
-    Identificacion: '',
-    Estado: '',
-
+    nombres : '',
+    apellidos : '',
+    correo : '',
+    telefonoMovil : '',
+    usuario : '',
+    contrasenia : '',
+    idEmpresa : '',
+    tipoIdentificacion : '',
+    identificacion : '',
+    estado : '',
   });
 
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
-    
-    
   };
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formState.name.trim() === "") {
-      toast.error('Por favor ingrese los campos obligatorios', {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        style: {
-          fontSize: '11px' // Tamaño de letra deseado
-        }
-      });
-    } else {
       try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-          method: 'POST',
-          body: JSON.stringify({
-            title: formState.title,
-            body: formState.body,
-            userId: formState.userId,
-          }),
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        });
-        const json = await response.json();
-        console.log(json);
+        const response = await CrearUsuario(formState);
+        console.log(response.success);
+        if (response.success === true
+          ) {
+          toast.success(`${response.message}`, {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            style: {
+              fontSize: '11px' // Tamaño de letra deseado
+            }
+          });
+          setFormState({
+            nombres : '',
+            apellidos : '',
+            correo : '',
+            telefonoMovil : '',
+            usuario : '',
+            contrasenia : '',
+            idEmpresa : '',
+            tipoIdentificacion : '',
+            identificacion : '',
+            estado : '',
+          });
+          // close modal after submit
+          setTimeout(() => {
+
+            handleCloseModal(false)
+          }, 1500);
+
+
+        } else {
+          toast.error(`${response.message}`, {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            style: {
+              fontSize: '11px' // Tamaño de letra deseado
+            }
+          });
+        }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
-      setError(false);
-    }
+    
   };
 
   return (
@@ -99,11 +105,10 @@ const CreateUser = () => {
             <Form.Label>Nombres</Form.Label>
             <Form.Control
               type="text"
-              name="Nombres"
-              value={formState.Nombres}
+              name="nombres"
+              value={formState.nombres}
               onChange={handleChange}
               required
-              
             />
           </Form.Group>
 
@@ -111,8 +116,8 @@ const CreateUser = () => {
                   <Form.Label>Apellidos  <span className="required-asterisk">*</span></Form.Label>
                   <Form.Control
                     type="text"
-                    name="Apellidos"
-                    value={formState.Apellidos}
+                    name="apellidos"
+                    value={formState.apellidos}
                     onChange={handleChange}
                     
                   />
@@ -123,8 +128,8 @@ const CreateUser = () => {
               <Form.Label>Correo Electronico  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="email"
-                name="Correo"
-                value={formState.Correo}
+                name="correo"
+                value={formState.correo}
                 onChange={handleChange}
               />
             </Form.Group>
@@ -133,8 +138,8 @@ const CreateUser = () => {
               <Form.Label>Telefono  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="text"
-                name="Telefono"
-                value={formState.Telefono}
+                name="telefonoMovil"
+                value={formState.telefonoMovil}
                 onChange={handleChange}
                 
               />
@@ -144,8 +149,8 @@ const CreateUser = () => {
               <Form.Label>Usuario  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="text"
-                name="Usuario"
-                value={formState.Usuario}
+                name="usuario"
+                value={formState.usuario}
                 onChange={handleChange}
                 
               />
@@ -155,8 +160,8 @@ const CreateUser = () => {
               <Form.Label>Contraseña  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="password"
-                name="Contraseña"
-                value={formState.Contraseña}
+                name="contrasenia"
+                value={formState.contrasenia}
                 onChange={handleChange}
                 required
               />
@@ -166,13 +171,13 @@ const CreateUser = () => {
               <Form.Label>Empresa  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 as="select" // cambia el tipo de input a select
-                name="Empresa"
-                value={formState.Empresa}
+                name="idEmpresa"
+                value={formState.idEmpresa}
                 onChange={handleChange}
                 required
               >
                 {Empresas.map((empresa) => (
-                  <option key={empresa.nombre} value={empresa.nombre}>{empresa.nombre}</option>
+                  <option key={empresa.nombre} value={empresa.id}>{empresa.nombre}</option>
                 ))}
               </Form.Control>
             </Form.Group>
@@ -182,14 +187,12 @@ const CreateUser = () => {
               <Form.Label>Tipo de Identificacion</Form.Label>
               <Form.Control
                 as="select"
-                name="TipodeIdentificacion"
-                value={formState.TipodeIdentificacion}
+                name="tipoIdentificacion"
+                value={formState.tipoIdentificacion}
                 onChange={handleChange}
                 required
               >
-                <option value="CC">Cedula de Ciudadania</option>
-                <option value="CE">Cedula de Extranjeria</option>
-                <option value="NIT">NIT</option>
+                <option value="CED">Cedula de Ciudadania</option>
               </Form.Control>
             </Form.Group>
 
@@ -198,8 +201,8 @@ const CreateUser = () => {
               <Form.Control
 
                 type="text"
-                name="Identificacion"
-                value={formState.Identificacion}
+                name="identificacion"
+                value={formState.identificacion}
                 onChange={handleChange}
                 required
               />
@@ -209,8 +212,8 @@ const CreateUser = () => {
               <Form.Label>Estado  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 as="select"
-                name="Estado"
-                value={formState.Estado}
+                name="estado"
+                value={formState.estado}
                 onChange={handleChange}
                 required
               >
@@ -255,8 +258,3 @@ const CreateUser = () => {
 };
 
 export default CreateUser;
-
-
-
-
-
