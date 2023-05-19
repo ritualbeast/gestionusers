@@ -1,26 +1,9 @@
 import { useState } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
-import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
+import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover, Tooltip } from '@mui/material';
 // mocks_
 import account from '../../../_mock/account';
-
-// ----------------------------------------------------------------------
-
-const MENU_OPTIONS = [
-  {
-    label: 'Inicio',
-    icon: 'eva:home-fill',
-  },
-  {
-    label: 'Perfil',
-    icon: 'eva:person-fill',
-  },
-  {
-    label: 'Configuracion',
-    icon: 'eva:settings-2-fill',
-  },
-];
 
 // ----------------------------------------------------------------------
 
@@ -33,6 +16,8 @@ export default function AccountPopover() {
 
   const handleClose = () => {
     setOpen(null);
+    localStorage.clear();
+    window.location.href = '/login';
   };
 
   return (
@@ -54,7 +39,7 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <Avatar src={account.photoURL} alt="photoURL" />
+        <Avatar alt="photoURL" />
       </IconButton>
 
       <Popover
@@ -77,23 +62,22 @@ export default function AccountPopover() {
         }}
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
-          <Typography variant="subtitle2" noWrap>
-            {account.displayName}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
-          </Typography>
+          <Tooltip  title={localStorage.getItem('nombreUsuario')} placement="top">
+            <Typography variant="subtitle2" noWrap>
+              {localStorage.getItem('nombreUsuario')}
+            </Typography>
+          </Tooltip>
+          <Tooltip title={localStorage.getItem('correoUsuario')} placement="top">
+          
+            <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+              {localStorage.getItem('correoUsuario')}
+            </Typography>
+          </Tooltip>
         </Box>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <Stack sx={{ p: 1 }}>
-          {MENU_OPTIONS.map((option) => (
-            <MenuItem key={option.label} onClick={handleClose}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Stack>
+        
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 

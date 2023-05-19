@@ -176,23 +176,22 @@ export default function UserPage() {
     setOpenModificar(false);
   };
 
+
+  useEffect(() => {
+    verificarLocalStorage();
+    fetchData();
+
+  }, []);
+
   
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await LoginToken();
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
-  }, []);
+  const verificarLocalStorage = () => {
+    const isAdmin = localStorage.getItem("nombreUsuario");
+    if (isAdmin === null) {
+      window.location.href = "/login";
+    }
+  }
 
-  useEffect(() => {
-    
-    fetchData();
 
-  }, []);
   
 
   const fetchData = async () => {
@@ -204,30 +203,31 @@ export default function UserPage() {
     }
   };
   const [valorcheck, setValorcheck] = useState([]);
-  // funcion para recoger datos del filtro y enviarlos a la api
-  const handleFiltrar = async () => {
+const [valorcheck2, setValorcheck2] = useState('');
 
-    try {
-      const response = await ConsultaUsuarios(filterName, valorcheck);
-      setDatosUser(response.data.row);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+const handleFiltrar = async () => {
+  try {
+    const response = await ConsultaUsuarios(filterName, valorcheck2);
+    setDatosUser(response.data.row);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-  const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target;
-    setIsSelectUsed(true);
-    if (checked) {
-      setCheckedItems({ ...checkedItems, [name]: true });
-    } else {
-      const { [name]: _, ...updatedCheckedItems } = checkedItems;
-      setCheckedItems(updatedCheckedItems);
-    }
-    
-    const selectedValues = Object.keys(checkedItems).filter((item) => checkedItems[item]);
-    setValorcheck(selectedValues);
-  };
+const handleCheckboxChange = (event) => {
+  const { name, checked } = event.target;
+  setIsSelectUsed(true);
+  if (checked) {
+    setCheckedItems({ ...checkedItems, [name]: true });
+    setValorcheck2(event.target.value);
+  } else {
+    const { [name]: _, ...updatedCheckedItems } = checkedItems;
+    setCheckedItems(updatedCheckedItems);
+  }
+  
+  const selectedValues = Object.keys(checkedItems).filter((item) => checkedItems[item]);
+  setValorcheck(selectedValues);
+};
   
   
 

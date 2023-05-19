@@ -8,7 +8,9 @@ import { includes } from 'lodash';
 import Empresas from '../../_mock/empresas';
 import { CrearUsuario } from '../../services/Userservices';
 
+
 const CreateUser = ({handleCloseModal}) => {
+
   const [error, setError] = useState("");
   const [camposIncompletos, setCamposIncompletos] = useState([]);
   const [formState, setFormState] = useState({
@@ -91,6 +93,13 @@ const CreateUser = ({handleCloseModal}) => {
       }
     
   };
+  useEffect(() => {
+    console.log(localStorage.getItem("nombreUsuario"));
+    const isAdmin = localStorage.getItem("nombreUsuario");
+    if (isAdmin === null) {
+      window.location.href = "/login";
+    }
+  }, []);
 
   return (
     <Container >

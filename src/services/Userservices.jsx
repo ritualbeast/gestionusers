@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 
-const LoginToken = async (info) => {
+const LoginToken = async (usuario, contrasenia) => {
   try {
     const base64 = {
       encode: (text) => {
         return btoa(text);
       }
     };
-    const credencial = {
-      user: 'darambulo',
-      pass: 1234
-    };
+    
     const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
-    const token = `Basic ${base64.encode(`${credencial.user}:${credencial.pass}`)}`;
+    const token = `Basic ${base64.encode(`${usuario}:${contrasenia}`)}`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': token,
@@ -28,11 +25,15 @@ const LoginToken = async (info) => {
     // Guardar los valores en el localStorage
     localStorage.setItem('token', data.data.token);
     localStorage.setItem('data', data.data.idUsuario);
+    
     await ValidarToken();
-    await ConsultaUsuarios();
-
+    
+    return data; // Retornar los datos
+    
   } catch (error) {
     console.error(error);
+    throw error; // Lanzar el error para que sea capturado en el lugar donde se llama a la función
+
   }
 };
 
@@ -60,7 +61,13 @@ const ValidarToken = async (info) => {
     
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/autenticacion/validar-login`, requestOptions);
     const data = await response.json();
+    console.log(data);
     localStorage.setItem('tokenValidado', data.data.token);
+    localStorage.setItem('nombreUsuario', data.data.nombres);
+    localStorage.setItem('correoUsuario', data.data.correo);
+    console.log(localStorage.getItem('nombreUsuario'));
+    await ConsultaUsuarios();
+    
 
   } catch (error) {
     console.error(error);
@@ -70,8 +77,7 @@ const ValidarToken = async (info) => {
 
 
 const ConsultaUsuarios = async (filterName='A', checkedItems='N') => {
-  console.log(filterName);
-  console.log(checkedItems);
+  
   try {
 
     const tokenUsuario = localStorage.getItem('tokenValidado');
@@ -91,7 +97,6 @@ const ConsultaUsuarios = async (filterName='A', checkedItems='N') => {
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/consultaUsuarios/${checkedItems}/${filterName}/?pagina=1&size=39`, requestOptions);
 
     const data = await response.json();
-    console.log(data);
     
     return data; // Devolver los datos obtenidos
 
