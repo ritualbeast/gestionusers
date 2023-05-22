@@ -44,14 +44,14 @@ export default function LoginForm() {
       <Stack spacing={3}>
         <TextField
           name="usuario"
-          label="Usuario"
+          placeholder='Usuario'
           value={usuario}
           onChange={(event) => setUsuario(event.target.value)}
         />
 
         <TextField
           name="contrasenia"
-          label="Contraseña"
+          placeholder='Contraseña'
           type={showPassword ? 'text' : 'password'}
           value={contrasenia}
           onChange={(event) => setContrasenia(event.target.value)}
@@ -76,9 +76,7 @@ export default function LoginForm() {
       <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleClick}>
         Ingresar
       </LoadingButton>
-      <Button onClick={() => navigate('/user')} fullWidth size="large" variant="outlined">
-        User
-      </Button>
+      
     </form>
   );
 }

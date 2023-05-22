@@ -35,64 +35,71 @@ const CreateUser = ({handleCloseModal}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-      try {
-        const response = await CrearUsuario(formState);
-        console.log(response.success);
-        if (response.success === true
-          ) {
-          toast.success(`${response.message}`, {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            style: {
-              fontSize: '11px' // Tamaño de letra deseado
-            }
-          });
-          setFormState({
-            nombres : '',
-            apellidos : '',
-            correo : '',
-            telefonoMovil : '',
-            usuario : '',
-            contrasenia : '',
-            idEmpresa : '',
-            tipoIdentificacion : '',
-            identificacion : '',
-            estado : '',
-          });
-          // close modal after submit
-          setTimeout(() => {
-
-            handleCloseModal(false)
-          }, 1500);
-
-
-        } else {
-          toast.error(`${response.message}`, {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-            style: {
-              fontSize: '11px' // Tamaño de letra deseado
-            }
-          });
+  
+    try {
+      const response = await CrearUsuario(formState);
+      console.log(response.success);
+      if (response.success === true) {
+        toast.success(`${response.message}`, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          style: {
+            fontSize: '11px' // Tamaño de letra deseado
+          }
+        });
+        setFormState({
+          nombres : '',
+          apellidos : '',
+          correo : '',
+          telefonoMovil : '',
+          usuario : '',
+          contrasenia : '',
+          idEmpresa : '',
+          tipoIdentificacion : '',
+          identificacion : '',
+          estado : '',
+        });
+        // Cerrar el modal después de enviar el formulario
+        setTimeout(() => {
+          handleCloseModal(false)
+        }, 1500);
+      } else {
+        let errorMessage = 'Error al crear el usuario';
+        if (response.code === 400) {
+          errorMessage = 'Ha ocurrido un error en la solicitud';
+          setCamposIncompletos(errorMessage);
+        } else if (response.code === 500) {
+          errorMessage = 'Ha ocurrido un error en el servidor';
+        } else if (response.code === 401) {
+          errorMessage = 'No estás autorizado para realizar esta acción';
         }
-      } catch (error) {
-        console.error(error);
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          style: {
+            fontSize: '11px' // Tamaño de letra deseado
+          }
+        });
       }
-    
+    } catch (error) {
+      console.error(error);
+      setError('Error al enviar el formulario');
+    }
   };
+  
   useEffect(() => {
     console.log(localStorage.getItem("nombreUsuario"));
     const isAdmin = localStorage.getItem("nombreUsuario");
@@ -111,7 +118,7 @@ const CreateUser = ({handleCloseModal}) => {
           <Form onSubmit={handleSubmit}>
           
           <Form.Group  className='formuser' controlId="firstName">
-            <Form.Label>Nombres</Form.Label>
+            <Form.Label>Nombres <span className="required-asterisk">*</span></Form.Label>
             <Form.Control
               type="text"
               name="nombres"
@@ -182,6 +189,7 @@ const CreateUser = ({handleCloseModal}) => {
                 as="select" // cambia el tipo de input a select
                 name="idEmpresa"
                 value={formState.idEmpresa}
+                defaultValue={formState.idEmpresa[0]}
                 onChange={handleChange}
                 required
               >
@@ -198,6 +206,7 @@ const CreateUser = ({handleCloseModal}) => {
                 as="select"
                 name="tipoIdentificacion"
                 value={formState.tipoIdentificacion}
+                defaultValue={formState.tipoIdentificacion[0]}
                 onChange={handleChange}
                 required
               >
@@ -231,20 +240,7 @@ const CreateUser = ({handleCloseModal}) => {
               </Form.Control>
             </Form.Group>
             <br/> 
-            { error &&
-              <div className="error-message">
-                <Alert variant="danger" style={{ 
-                  backgroundColor: '#f8d7da', 
-                  borderColor: '#f5c6cb', 
-                  color: '#721c24', 
-                  padding: '0.75rem 1.25rem', 
-                  marginBottom: '1rem', 
-                  borderRadius: '0.25rem', 
-                }}>
-                  {error}
-                </Alert>
-              </div>
-            }
+            
             <Row className="justify-content-center">
               <Col md={4}>
                 <Button

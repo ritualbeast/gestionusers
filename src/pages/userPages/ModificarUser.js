@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import '../../styles/modificaruser.css';
+import { ToastContainer, toast } from 'react-toastify';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import PersonIcon from '@material-ui/icons/Person';
 import Empresas from '../../_mock/empresas';
 
-
-const ModificarUser = () => {
+const ModificarUser = (props) => {
+  const { handleCloseModificar, userId } = props;
   const [formState, setFormState] = useState({
-    Nombres: '',
-    Apellidos: '',
-    Correo: '',
-    Telefono: '',
-    Usuario: '',
-    Contraseña: '',
-    Empresa: '',
-    TipodeIdentificacion: '',
-    Identificacion: '',
-    Estado: '',
+    nombres : '',
+    apellidos : '',
+    correo : '',
+    telefonoMovil : '',
+    usuario : '',
+    contrasenia : '',
+    idEmpresa : '',
+    tipoIdentificacion : '',
+    identificacion : '',
+    estado : '',
   });
 
 
@@ -24,9 +25,9 @@ const ModificarUser = () => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  };
+  
+
+  
 
   return (
     <Container >
@@ -34,98 +35,102 @@ const ModificarUser = () => {
         <Col>
           < PersonIcon  style={{ width: 50, height: 50 }}/>
           <h2>Editar Usuario</h2>
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              <Col md={6}>
-              <Form.Group className='formuser' controlId="firstName">
-                  <Form.Label>Nombres</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="Nombres"
-                    value={formState.Nombres}
-                    onChange={handleChange}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
+          < Form >
+          
+          <Form.Group  className='formuser' controlId="firstName">
+            <Form.Label>Nombres <span className="required-asterisk">*</span></Form.Label>
+            <Form.Control
+              type="text"
+              name="nombres"
+              value={formState.nombres}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
                 <Form.Group className='formuser' controlId="lastName">
-                  <Form.Label>Apellidos</Form.Label>
+                  <Form.Label>Apellidos  <span className="required-asterisk">*</span></Form.Label>
                   <Form.Control
                     type="text"
-                    name="Apellidos"
-                    value={formState.Apellidos}
+                    name="apellidos"
+                    value={formState.apellidos}
                     onChange={handleChange}
+                    
                   />
                 </Form.Group>
-              </Col>
-            </Row>
+              
 
             <Form.Group className='formuser' controlId="email">
-              <Form.Label>Correo Electronico</Form.Label>
+              <Form.Label>Correo Electronico  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="email"
-                name="Correo"
-                value={formState.Correo}
+                name="correo"
+                value={formState.correo}
                 onChange={handleChange}
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="phone">
-              <Form.Label>Telefono</Form.Label>
+              <Form.Label>Telefono  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="text"
-                name="Telefono"
-                value={formState.Telefono}
+                name="telefonoMovil"
+                value={formState.telefonoMovil}
                 onChange={handleChange}
+                
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="user">
-              <Form.Label>Usuario</Form.Label>
+              <Form.Label>Usuario  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="text"
-                name="Usuario"
-                value={formState.Usuario}
+                name="usuario"
+                value={formState.usuario}
                 onChange={handleChange}
+                
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="password">
-              <Form.Label>Contraseña</Form.Label>
+              <Form.Label>Contraseña  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 type="password"
-                name="Contraseña"
-                value={formState.Contraseña}
+                name="contrasenia"
+                value={formState.contrasenia}
                 onChange={handleChange}
+                required
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="company">
-              <Form.Label>Empresa</Form.Label>
+              <Form.Label>Empresa  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 as="select" // cambia el tipo de input a select
-                name="Empresa"
-                value={formState.Empresa}
+                name="idEmpresa"
+                value={formState.idEmpresa}
+                defaultValue={formState.idEmpresa[0]}
                 onChange={handleChange}
                 required
               >
                 {Empresas.map((empresa) => (
-                  <option key={empresa.nombre} value={empresa.nombre}>{empresa.nombre}</option>
+                  <option key={empresa.nombre} value={empresa.id}>{empresa.nombre}</option>
                 ))}
               </Form.Control>
             </Form.Group>
+
 
             <Form.Group className='formuser' controlId="identificationType">
               <Form.Label>Tipo de Identificacion</Form.Label>
               <Form.Control
                 as="select"
-                name="TipodeIdentificacion"
-                value={formState.TipodeIdentificacion}
+                name="tipoIdentificacion"
+                value={formState.tipoIdentificacion}
+                defaultValue={formState.tipoIdentificacion[0]}
                 onChange={handleChange}
+                required
               >
-                <option value="CC">Cedula de Ciudadania</option>
-                <option value="CE">Cedula de Extranjeria</option>
-                <option value="NIT">NIT</option>
+                <option value="CED">Cedula de Ciudadania</option>
               </Form.Control>
             </Form.Group>
 
@@ -134,40 +139,43 @@ const ModificarUser = () => {
               <Form.Control
 
                 type="text"
-                name="Identificacion"
-                value={formState.Identificacion}
+                name="identificacion"
+                value={formState.identificacion}
                 onChange={handleChange}
+                required
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="status">
-              <Form.Label>Estado</Form.Label>
+              <Form.Label>Estado  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
                 as="select"
-                name="Estado"
-                value={formState.Estado}
+                name="estado"
+                value={formState.estado}
                 onChange={handleChange}
+                required
               >
                 <option value="Activo">Activo</option>
                 <option value="Inactivo">Inactivo</option>
               </Form.Control>
             </Form.Group>
-
-
+            <br/> 
+            
             <Row className="justify-content-center">
               <Col md={4}>
                 <Button
 
                   variant="primary"
                   type="submit"
-                  className="btn-block"
+                  className="btnblock"
                 >
-                  Modificar
+                  Crear
                 </Button>
               </Col>
               
             </Row>
           </Form>
+          <ToastContainer />
         </Col>
       </Row>
     </Container>

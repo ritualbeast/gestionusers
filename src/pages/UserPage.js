@@ -2,6 +2,7 @@
 import { Helmet } from 'react-helmet-async';
 import { filter, set } from 'lodash';
 import {  useState, useEffect, useContext } from 'react';
+
 // @mui
 import {Card,Table,  Stack,  Paper, Avatar,  Button, InputLabel,
   Popover,  Checkbox,  TableRow,  MenuItem,
@@ -9,6 +10,7 @@ import {Card,Table,  Stack,  Paper, Avatar,  Button, InputLabel,
   Typography,  IconButton, TableContainer, TablePagination, Box, Menu, Select, FormControl, FormControlLabel, FormGroup
 } from '@mui/material';
 
+import { toast } from 'react-toastify';
 import { Row, Col, Tab } from 'react-bootstrap';
 import CloseIcon from '@material-ui/icons/Close';
 // components
@@ -17,7 +19,7 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import {deleteUser, LoginToken, ConsultaUsuarios, ValidarToken } from '../services/Userservices';
+import { ConsultaUsuarios, ValidarToken } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
@@ -29,10 +31,12 @@ import ModificarUser from './userPages/ModificarUser';
 import '../styles/deleteuser.css';
 
 const TABLE_HEAD = [
+  { id: 'id', label: 'Id', alignRight: false },
   { id: 'nombre', label: 'Nombre', alignRight: false },
   { id: 'apellido', label: 'Apellido', alignRight: false },
   { id: 'correo', label: 'Correo', alignRight: false },
   { id: 'estado', label: 'Estado', alignRight: false },
+  { id: 'acciones' , label: 'Acciones', alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -74,8 +78,8 @@ export default function UserPage() {
   const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
   const [orderBy, setOrderBy] = useState('name');
-  const [filterName, setFilterName] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [filterName, setFilterName] = useState('A');
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [openModal, setOpenModal] = useState(false);
   const [openModificar, setOpenModificar] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
@@ -84,10 +88,11 @@ export default function UserPage() {
   const [isSelectUsed, setIsSelectUsed] = useState(false);
   const [isToolbarUsed, setIsToolbarUsed] = useState(false);
   const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
+  const [errores, setErrores] = useState([]);
+  const [valorcheck, setValorcheck] = useState([]);
+  const [valorcheck2, setValorcheck2] = useState('N');
+  const [idUsuario, setIdUsuario] = useState('');
   
-
-
-
 
   const [checkedItems, setCheckedItems] = useState({
     nombres: '',
@@ -95,9 +100,9 @@ export default function UserPage() {
     estado: '',
   });
 
-  
-  const handleOpenMenu = (event) => {
+  const handleOpenMenu = (event, userId) => {
     setOpen(event.currentTarget);
+    setIdUsuario(userId);
   };
 
   const handleCloseMenu = () => {
@@ -110,36 +115,7 @@ export default function UserPage() {
   const handleCloseEliminar = () => {
     setOpenEliminar(false);
   };
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = USERLIST.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-    }
-    setSelected(newSelected);
-  };
-
+  
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -153,9 +129,10 @@ export default function UserPage() {
     setPage(0);
     setFilterName(event.target.value);
     setIsToolbarUsed(true);
+    if (!event.target.value) {
+      setIsToolbarUsed(false);
+    }
   };
-
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
 
   const filteredUsers = applySortFilter(datosUser, getComparator(order, orderBy), filterName);
 
@@ -178,36 +155,52 @@ export default function UserPage() {
 
 
   useEffect(() => {
-    verificarLocalStorage();
+    // verificarLocalStorage();
     fetchData();
 
   }, []);
 
   
-  const verificarLocalStorage = () => {
-    const isAdmin = localStorage.getItem("nombreUsuario");
-    if (isAdmin === null) {
-      window.location.href = "/login";
-    }
-  }
-
-
-  
+  // const verificarLocalStorage = () => {
+  //   const isAdmin = localStorage.getItem("nombreUsuario");
+  //   if (isAdmin === null) {
+  //     window.location.href = "/login";
+  //   }
+  // }
 
   const fetchData = async () => {
     try {
+      // clear checkitems
+      setCheckedItems({
+        nombres: '',
+        correo: '',
+        estado: '',
+      });
+      setFilterName('');
       const response = await ConsultaUsuarios();
       setDatosUser(response.data.row);
     } catch (error) {
       console.error(error);
     }
   };
-  const [valorcheck, setValorcheck] = useState([]);
-const [valorcheck2, setValorcheck2] = useState('');
 
 const handleFiltrar = async () => {
   try {
     const response = await ConsultaUsuarios(filterName, valorcheck2);
+    if (response.success === true) {
+      toast.success(`${response.message}`
+        , {
+          position: "top-right",
+          autoClose: 2000,
+        });
+    } else {
+      toast.error(`${response.message}`
+        , {
+          position: "top-right",
+          autoClose: 2000,
+        });
+    }
+
     setDatosUser(response.data.row);
   } catch (error) {
     console.error(error);
@@ -215,8 +208,14 @@ const handleFiltrar = async () => {
 };
 
 const handleCheckboxChange = (event) => {
+  if (event.target.checked) {
+    setIsSelectUsed(true);
+  }
+  else {
+    setIsSelectUsed(false);
+  }
+
   const { name, checked } = event.target;
-  setIsSelectUsed(true);
   if (checked) {
     setCheckedItems({ ...checkedItems, [name]: true });
     setValorcheck2(event.target.value);
@@ -224,10 +223,14 @@ const handleCheckboxChange = (event) => {
     const { [name]: _, ...updatedCheckedItems } = checkedItems;
     setCheckedItems(updatedCheckedItems);
   }
-  
   const selectedValues = Object.keys(checkedItems).filter((item) => checkedItems[item]);
   setValorcheck(selectedValues);
+  
+  
 };
+
+
+const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
   
   
 
@@ -242,7 +245,7 @@ const handleCheckboxChange = (event) => {
 
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            Usuario
+            Gestion de Usuarios
           </Typography>
           
           <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}
@@ -287,22 +290,20 @@ const handleCheckboxChange = (event) => {
           variant="contained"  onClick={handleFiltrar} disabled={isButtonDisabled}>
             Filtrar
           </Button>
+          <Button style={{ margin : '0 0 0 1rem' }}
+          variant="contained"  onClick={fetchData}>
+            Limpiar
+          </Button>
         </div>
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
               <Table>
                 <UserListHead
-                  order={order}
-                  orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={USERLIST.length}
-                  numSelected={selected.length}
-                  onRequestSort={handleRequestSort}
-                  onSelectAllClick={handleSelectAllClick}
                 />
 
                 <TableBody>
-                  {Array.isArray(datosUser) && datosUser.map((user, index) => (
+                  {Array.isArray(paginatedData) && paginatedData.map((user, index) => (
                     <TableRow key={user.idUsuario}>
                       <TableCell> 
                         {index + 1}
@@ -312,7 +313,7 @@ const handleCheckboxChange = (event) => {
                       <TableCell>{user.correo}</TableCell>
                       <TableCell>{user.estado}</TableCell>
                       <TableCell align="center">
-                        <IconButton size="large" color="inherit" onClick={handleOpenMenu}>
+                        <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idUsuario)}>
                           <Iconify icon={'eva:more-vertical-fill'} />
                         </IconButton>
                       </TableCell>
@@ -438,7 +439,10 @@ const handleCheckboxChange = (event) => {
           <IconButton onClick={handleCloseModificar} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
             <CloseIcon />
           </IconButton>
-          <ModificarUser />
+          <ModificarUser
+            handleCloseModificar={handleCloseModificar} 
+            userId={idUsuario}
+          />
         </Box>
       </Modal>
       <Modal

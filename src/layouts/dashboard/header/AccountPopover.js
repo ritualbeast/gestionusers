@@ -19,6 +19,10 @@ export default function AccountPopover() {
     localStorage.clear();
     window.location.href = '/login';
   };
+  const handleClose2 = () => {
+    setOpen(null);
+
+  };
 
   return (
     <>
@@ -45,7 +49,8 @@ export default function AccountPopover() {
       <Popover
         open={Boolean(open)}
         anchorEl={open}
-        onClose={handleClose}
+        
+        onClose={handleClose2}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         PaperProps={{

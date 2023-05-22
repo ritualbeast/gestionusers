@@ -9,11 +9,11 @@ import account from '../../../_mock/account';
 // hooks
 import useResponsive from '../../../hooks/useResponsive';
 // components
-import Logo from '../../../components/logo';
 import Scrollbar from '../../../components/scrollbar';
 import NavSection from '../../../components/nav-section';
 //
 import navConfig from './config';
+import logo from '../../../assets/img/ic_goit.png';
 
 // ----------------------------------------------------------------------
 
@@ -54,7 +54,15 @@ export default function Nav({ openNav, onCloseNav }) {
       }}
     >
       <Box sx={{ px: 2.5, py: 3, display: 'inline-flex' }}>
-        <Logo />
+        {logo && (
+          <Box
+            component="img"
+            src={logo}
+            sx={{ width: 80, height: 40 }}
+            color="inherit"
+          />
+        )}
+        
       </Box>
 
       <Box sx={{ mb: 5, mx: 2.5 }}>
@@ -62,7 +70,7 @@ export default function Nav({ openNav, onCloseNav }) {
           <StyledAccount>
             <Box sx={{ ml: 2 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {account.displayName}
+                {localStorage.getItem('nombreUsuario')}
               </Typography>
 
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
