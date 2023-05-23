@@ -80,7 +80,7 @@ const ConsultaUsuarios = async (filterName='A', checkedItems='N') => {
   
   try {
 
-    const tokenUsuario = localStorage.getItem('tokenValidado');
+    const tokenUsuario = localStorage.getItem('token');
    
    
     const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
@@ -146,9 +146,33 @@ const CrearUsuario = async (datosUsuario) => {
   }
 };
 
-const UpdateUser = async (datosUsuario, idUsuario) => {
+
+const EliminarUsuario = async (userId) => {
   try {
-    const tokenUsuario = localStorage.getItem('tokenValidado');
+    const tokenUsuario = localStorage.getItem('token');
+    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const token = `Bearer ${tokenUsuario}`;
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+      Canal: canales
+    };
+    const requestOptions = {
+      method: 'DELETE',
+      headers,
+    };
+    const response = await fetch(`http://localhost:8989/goit-security-api/v2/usuario/eliminarUsuario/${userId}`, requestOptions);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+const ObtenerUsuarioPorId = async (userId) => {
+  try {
+    const tokenUsuario = localStorage.getItem('token');
     const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
@@ -157,26 +181,14 @@ const UpdateUser = async (datosUsuario, idUsuario) => {
       'Authorization': token,
       'Canal': canales
     };
-    const body = {
-      "usuario": datosUsuario.usuario,
-      "contrasenia": datosUsuario.contrasenia,
-      "idEmpresa": datosUsuario.idEmpresa,
-      "correo": datosUsuario.correo,
-      "nombres": datosUsuario.nombres,
-      "apellidos": datosUsuario.apellidos,
-      "telefonoMovil": datosUsuario.telefonoMovil,
-      "estado": datosUsuario.estado,
-      "tipoIdentificacion": datosUsuario.tipoIdentificacion,
-      "identificacion": datosUsuario.identificacion
-    };
     const requestOptions = {
-      method: 'POST',
+      method: 'GET',
       headers,
-      body: JSON.stringify(body)
     };
-    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/actualizar/${idUsuario}`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/ObtenerUsuarioPorId/${userId}`, requestOptions);
     const data = await response.json();
     console.log(data);
+    
 
     return data; // Devolver los datos obtenidos
 
@@ -186,13 +198,37 @@ const UpdateUser = async (datosUsuario, idUsuario) => {
   }
 };
 
-
+const ActualizarUsuario = async (userId, userData) => {
+  try {
+    const tokenUsuario = localStorage.getItem('token');
+    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const token = `Bearer ${tokenUsuario}`;
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': token,
+      'Canal': canales
+    };
+    const requestOptions = {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(userData)
+    };
+    const response = await fetch(`http://localhost:8989/goit-security-api/v2/usuario/actualizar/${userId}`, requestOptions);
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
 
 
 
 
   export {
-     LoginToken, ConsultaUsuarios, ValidarToken, CrearUsuario, UpdateUser
+     LoginToken, ConsultaUsuarios, ValidarToken, CrearUsuario, EliminarUsuario, ObtenerUsuarioPorId, ActualizarUsuario
     
   }
   

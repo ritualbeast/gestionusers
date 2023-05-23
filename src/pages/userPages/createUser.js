@@ -100,13 +100,13 @@ const CreateUser = ({handleCloseModal}) => {
     }
   };
   
-  useEffect(() => {
-    console.log(localStorage.getItem("nombreUsuario"));
-    const isAdmin = localStorage.getItem("nombreUsuario");
-    if (isAdmin === null) {
-      window.location.href = "/login";
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log(localStorage.getItem("nombreUsuario"));
+  //   const isAdmin = localStorage.getItem("nombreUsuario");
+  //   if (isAdmin === null) {
+  //     window.location.href = "/login";
+  //   }
+  // }, []);
 
   return (
     <Container >

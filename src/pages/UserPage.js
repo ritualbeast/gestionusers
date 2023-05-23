@@ -19,11 +19,12 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import { ConsultaUsuarios, ValidarToken } from '../services/Userservices';
+import { ConsultaUsuarios, ValidarToken, EliminarUsuario } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
 import ModificarUser from './userPages/ModificarUser';
+
 
 
 // ----------------------------------------------------------------------
@@ -206,6 +207,17 @@ const handleFiltrar = async () => {
     console.error(error);
   }
 };
+
+const handleEliminar = async () => {
+  console.log(idUsuario);
+  try {
+    const response = await EliminarUsuario(idUsuario);
+    console.log(response);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
 const handleCheckboxChange = (event) => {
   if (event.target.checked) {
@@ -458,7 +470,9 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
               Desea eliminar el usuario?
             </Col>
             <Col>
-              <Button className='buttondeleteuser' variant="contained" color="primary">
+              <Button className='buttondeleteuser' variant="contained" color="primary"
+              onClick={handleEliminar}
+              >
                 Eliminar
               </Button>
               <Button className='buttondeleteuser' variant="contained" color="primary" onClick={handleCloseEliminar}>
