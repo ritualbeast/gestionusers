@@ -29,7 +29,6 @@ import { UserListHead } from '../sections/@dashboard/user';
 // mock
 import CreateRole from './roles/createRole';
 import Editar from './roles/editar';
-import Roleservices from '../services/Roleservices';
 
 
 // ----------------------------------------------------------------------
@@ -44,7 +43,7 @@ const TABLE_HEAD = [
 
 // ----------------------------------------------------------------------
 
-export default function UserPage() {
+export default function RolesPage() {
   const [open, setOpen] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [openModal2, setOpenModal2] = useState(false);
@@ -100,12 +99,12 @@ export default function UserPage() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await Roleservices();
-      console.log(response.data);
-      setDatosRole(response.data);
-    };
-    fetchData();
+    // const fetchData = async () => {
+    //   const response = await Roleservices();
+    //   console.log(response.data);
+    //   setDatosRole(response.data);
+    // };
+    // fetchData();
   }, []);
 
   return (
