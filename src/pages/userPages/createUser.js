@@ -233,6 +233,7 @@ const CreateUser = ({handleCloseModal}) => {
                 name="estado"
                 value={formState.estado}
                 onChange={handleChange}
+                defaultValue={formState.estado[0]}
                 required
               >
                 <option value="A">Activo</option>

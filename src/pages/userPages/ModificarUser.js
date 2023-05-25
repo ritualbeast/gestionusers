@@ -39,7 +39,7 @@ const ModificarUser = (props) => {
   
   useEffect(() => {
     fetchData();
-  }, [handleRefresh]);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -92,6 +92,7 @@ const ModificarUser = (props) => {
         });
         // Cerrar el modal después de enviar el formulario
         setTimeout(() => {
+          handleRefresh();
           handleCloseModificar(false)
         }, 1500);
         

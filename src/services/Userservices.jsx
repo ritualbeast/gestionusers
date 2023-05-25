@@ -107,8 +107,9 @@ const ConsultaUsuarios = async (filterName='A', checkedItems='N') => {
 };
 
 const CrearUsuario = async (datosUsuario) => {
+  console.log(datosUsuario);
   try {
-    const tokenUsuario = localStorage.getItem('tokenValidado');
+    const tokenUsuario = localStorage.getItem('token');
     const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {

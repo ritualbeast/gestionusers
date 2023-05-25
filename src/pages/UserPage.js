@@ -168,8 +168,8 @@ export default function UserPage() {
   //     window.location.href = "/login";
   //   }
   // }
-
   const fetchData = async () => {
+    console.log('ok')
     try {
       // clear checkitems
       setCheckedItems({
@@ -476,7 +476,7 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
           <ModificarUser
             handleCloseModificar={handleCloseModificar} 
             userId={idUsuario}
-            handleRefresh = {handleRefresh}
+            handleRefresh = {fetchData}
           />
           
         </Box>
