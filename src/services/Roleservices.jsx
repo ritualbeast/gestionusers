@@ -16,39 +16,38 @@ const ConsultarRolUsuario = async () => {
     throw error;
   }
 };
+const AsignarRolUsuario = async (datosRolUsuario, idUsuario) => {
+  try {
+    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152efSA';
+    const headers = {
+      'Canal': canales
+    };
+    const body = {
+        "idUsuario": idUsuario,
+        "listRoles":[
+          {
+            "idRol": datosRolUsuario.idRol,
+            "descripcion": datosRolUsuario.descripcion,
+            "estado": datosRolUsuario.estado,
+            "usuarioCreacion": datosRolUsuario.usuarioCreacion,
+          }
 
-// const ActualizarRolUsuario = async (datosRolUsuario) => {
-//   try {
-//     const tokenUsuario = localStorage.getItem('tokenValidado');
-//     const token = `Bearer ${tokenUsuario}`;
-//     const body = {
-//       "listRoles": [
-//           {
-//               "idRol": datosRolUsuario.idRol,
-//               "descripcion": datosRolUsuario.descripcion,
-//               "estado": datosRolUsuario.estado,
-//               "usuarioActualizacion": datosRolUsuario.usuarioActualizacion,
-//           }
-//       ]
-//     };
-//     const requestOptions = {
-//       method: 'PUT',
-//       body: JSON.stringify(body)
-//     };
-//     const response = await fetch('http://localhost:8989/goit-security-api/v2/usuario/roles/actualizarRolUsuario/42583c31-4299-4b8e-86a6-f4426fd3fda8', requestOptions);
-//     const data = await response.json();
-//     console.log(data);
-
-//     return data; // Devolver los datos obtenidos
-
-//   } catch (error) {
-//     console.error(error);
-//     throw error; // Lanzar el error para que sea capturado en el lugar donde se llama a la función
-//   }
-// };
-
-  export {
-    ConsultarRolUsuario, 
-    // ActualizarRolUsuario
+        ]
+    };
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(body)
+    };
+    const response = await fetch('http://desa.goitsa.me:8988/goit-security-api/v2/usuario/roles/asignarRolUsuario', requestOptions);
+    const data = await response.json();
+    console.log(data);
+    return data; // Devolver los datos obtenidos
+  } catch (error) {
+    console.error(error);
+    throw error; // Lanzar el error para que sea capturado en el lugar donde se llama a la función
   }
-  
+};
+  export {
+    ConsultarRolUsuario,
+    AsignarRolUsuario
+  }

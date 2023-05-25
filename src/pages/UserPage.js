@@ -19,7 +19,7 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import { ConsultaUsuarios, ValidarToken, EliminarUsuario } from '../services/Userservices';
+import { ConsultaUsuarios, ValidarToken, EliminarUsuario, ObtenerUsuarioPorId } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';

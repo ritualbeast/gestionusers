@@ -6,11 +6,19 @@ import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import Select from 'react-select';
 import PersonIcon from '@material-ui/icons/Person';
 import Empresas from '../../_mock/empresas';
-import { ConsultarRolUsuario } from '../../services/Roleservices';
+import { ConsultarRolUsuario, AsignarRolUsuario } from '../../services/Roleservices';
+import { ObtenerUsuarioPorId, ActualizarUsuario } from '../../services/Userservices';
 
 const ModificarUser = (props) => {
-  const { handleCloseModificar, userId } = props;
+  const { handleCloseModificar, userId, handleRefresh 
+   } = props;
   // cambios nuevos
+  const [datosRecibidosporId, setDatosRecibidosporId] = useState([]);
+  const [error, setError] = useState("");
+  const [camposIncompletos, setCamposIncompletos] = useState([]);
+  const [consultaRol, setConsultaRol] = useState([]);
+  const [consultarRol2, setConsultarRol2] = useState([]);
+  const [UsuarioCreacion, setUsuarioCreacion] = useState([]);
   const [formState, setFormState] = useState({
     nombres : '',
     apellidos : '',
@@ -22,13 +30,25 @@ const ModificarUser = (props) => {
     tipoIdentificacion : '',
     identificacion : '',
     estado : '',
-    Rol: []
   });
-  const [consultaRol, setConsultaRol] = useState([]);
 
   const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+  
+    let sanitizedValue = value;
+  
+    if (name === 'telefonoMovil' || name === 'identificacion') {
+      sanitizedValue = value.replace(/\s+/g, '').replace(/\D/g, '').slice(0, 10);
+    } else if (name === 'correo' || name === 'usuario' || name === 'contrasenia') {
+      sanitizedValue = value.replace(/\s+/g, '');
+    }
+  
+    setFormState((prevState) => ({
+      ...prevState,
+      [name]: sanitizedValue,
+    }));
   };
+  
   
   useEffect(() => {
     fetchData();
@@ -68,9 +88,6 @@ const ModificarUser = (props) => {
     }
   };
 
-  const revisarcampos = () => {
-    console.log(formState);
-  };
 
  
   const handleSubmit = async (e) => {
@@ -78,7 +95,7 @@ const ModificarUser = (props) => {
   
     try {
       const response = await ActualizarUsuario(userId, formState);
-      console.log(response.success);
+      
       if (response.success === true) {
         toast.success(`${response.message}`, {
           // Configuración del toast
@@ -123,25 +140,65 @@ const ModificarUser = (props) => {
 
   const handleOptionChange = (selectedOptions) => {
     const selectedValues = selectedOptions.map((option) => option.value);
-    setFormState({ ...formState, Rol: selectedValues });
+    console.log(selectedValues);
+    setFormState({ ...formState, rol: selectedValues });
   };
 
   useEffect(() => {
-    consultarRol();
+    consultarUsuario();
   }, []);
+
+  const consultarUsuario = async () => {
+    try {
+      const response = await ObtenerUsuarioPorId(userId);
+      const data = await response;
+      setDatosRecibidosporId(response);
+      setFormState({
+
+        nombres : data.data.nombres,
+        apellidos : data.data.apellidos,
+        correo : data.data.correo,
+        telefonoMovil : data.data.telefonoMovil,
+        usuario : data.data.usuario,
+        contrasenia : data.data.contrasenia,
+        idEmpresa : data.data.idEmpresa,
+        identificacion : data.data.identificacion,
+        tipoIdentificacion : data.data.tipoIdentificacion,
+        estado : data.data.estado,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   const consultarRol = async () => {
     try {
       const response = await ConsultarRolUsuario();
-      console.log(response)
+      
       const roles = response.data.listRoles;
       setConsultaRol(roles);
+      const roles2 = response.data;
+      setConsultarRol2(roles2);
+      console.log(consultarRol2);
     } catch (error) {
       console.error('Error al consultar los roles:', error);
       // Manejar el error de consulta de roles
     }
   };
+  const revisar = () => {
+    console.log(formState);
+  };
 
+  const getBorderStyle = (fieldName) => {
+    if (formState[fieldName] === '' && fieldName !== 'identificacion' && fieldName !== 'tipoIdentificacion') {
+      return { borderColor: '#E5664B' };
+    }
+    if (formState[fieldName] !== '' && fieldName !== 'identificacion' && fieldName !== 'tipoIdentificacion') {
+      return { borderColor: '#ced4da' };
+    }
+    return {};
+  };
 
   return (
     <Container >
@@ -159,6 +216,7 @@ const ModificarUser = (props) => {
               value={formState.nombres}
               onChange={handleChange}
               required
+              style={getBorderStyle('nombres')}
             />
             </Form.Group>
 
@@ -169,7 +227,8 @@ const ModificarUser = (props) => {
                     name="apellidos"
                     value={formState.apellidos}
                     onChange={handleChange}
-                    
+                    required
+                    style={getBorderStyle('apellidos')}
                   />
             </Form.Group>
             
@@ -180,6 +239,8 @@ const ModificarUser = (props) => {
                 name="correo"
                 value={formState.correo}
                 onChange={handleChange}
+                required
+                style={getBorderStyle('correo')}
               />
             </Form.Group>
 
@@ -190,6 +251,8 @@ const ModificarUser = (props) => {
                 name="telefonoMovil"
                 value={formState.telefonoMovil}
                 onChange={handleChange}
+                required
+                style={getBorderStyle('telefonoMovil')}
                 
               />
             </Form.Group>
@@ -201,7 +264,8 @@ const ModificarUser = (props) => {
                 name="usuario"
                 value={formState.usuario}
                 onChange={handleChange}
-                
+                required
+                style={getBorderStyle('usuario')}
               />
             </Form.Group>
 
@@ -213,6 +277,7 @@ const ModificarUser = (props) => {
                 value={formState.contrasenia}
                 onChange={handleChange}
                 required
+                style={getBorderStyle('contrasenia')}
               />
             </Form.Group>
 
@@ -225,6 +290,7 @@ const ModificarUser = (props) => {
                 defaultValue={formState.idEmpresa[0]}
                 onChange={handleChange}
                 required
+                style={getBorderStyle('idEmpresa')}
               >
                 {Empresas.map((empresa) => (
                   <option key={empresa.nombre} value={empresa.id}>{empresa.nombre}</option>
@@ -240,6 +306,7 @@ const ModificarUser = (props) => {
                 value={formState.tipoIdentificacion}
                 onChange={handleChange}
                 required
+                style={getBorderStyle('tipoIdentificacion')}
               >
                 <option value="">Selecciona un tipo de identificación</option>
                 <option value="CED" selected={formState.tipoIdentificacion === "CED"}>Cedula de Ciudadania</option>
@@ -257,6 +324,7 @@ const ModificarUser = (props) => {
                 value={formState.identificacion}
                 onChange={handleChange}
                 required
+                style={getBorderStyle('identificacion')}
               />
             </Form.Group>
 
@@ -268,20 +336,14 @@ const ModificarUser = (props) => {
                 value={formState.estado}
                 onChange={handleChange}
                 required
+                style={getBorderStyle('estado')}
               >
                 <option value="A">Activo</option>
                 <option value="I">Inactivo</option>
               </Form.Control>
             </Form.Group>
 
-            <Form.Group className="formuser" controlId="rol">
-  <Form.Label>Rol <span className="required-asterisk">*</span></Form.Label>
-  <Select
-    options={consultaRol.map(rol => ({ value: rol.nombre, label: rol.nombre }))}
-    isMulti
-    onChange={handleOptionChange}
-  />
-</Form.Group>
+
 
             <br/> 
             
@@ -295,6 +357,8 @@ const ModificarUser = (props) => {
                 >
                   Modificar usuario
                 </Button>
+                <Button onClick={revisar}
+                >Revisar</Button>
               </Col>
             </Row>
           </Form>

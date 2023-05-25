@@ -13,25 +13,39 @@ const CreateUser = ({handleCloseModal}) => {
   const [error, setError] = useState("");
   const [camposIncompletos, setCamposIncompletos] = useState([]);
   const [formState, setFormState] = useState({
-    nombres : '',
-    apellidos : '',
-    correo : '',
-    telefonoMovil : '',
-    usuario : '',
-    contrasenia : '',
-    idEmpresa : '',
-    tipoIdentificacion : '',
-    identificacion : '',
-    estado : '',
+    nombres: "",
+    apellidos: "",
+    correo: "",
+    telefonoMovil: "",
+    usuario: "",
+    contrasenia: "",
+    idEmpresa: Empresas.length > 0 ? Empresas[0].id : "",
+    tipoIdentificacion: "",
+    identificacion: "",
+    estado: "A",
   });
 
   const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+  
+    let sanitizedValue = value;
+  
+    if (name === 'telefonoMovil' || name === 'identificacion') {
+      sanitizedValue = value.replace(/\s+/g, '').replace(/\D/g, '').slice(0, 10);
+    } else if (name === 'correo' || name === 'usuario' || name === 'contrasenia') {
+      sanitizedValue = value.replace(/\s+/g, '');
+    }
+  
+    setFormState((prevState) => ({
+      ...prevState,
+      [name]: sanitizedValue,
+    }));
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setCamposIncompletos([]);
+    
     try {
       const response = await CrearUsuario(formState);
       console.log(response.success);
@@ -56,10 +70,10 @@ const CreateUser = ({handleCloseModal}) => {
           telefonoMovil : '',
           usuario : '',
           contrasenia : '',
-          idEmpresa : '',
+          idEmpresa : '1',
           tipoIdentificacion : '',
           identificacion : '',
-          estado : '',
+          estado : 'A',
         });
         // Cerrar el modal después de enviar el formulario
         setTimeout(() => {
@@ -68,7 +82,7 @@ const CreateUser = ({handleCloseModal}) => {
       } else {
         let errorMessage = 'Error al crear el usuario';
         if (response.code === 400) {
-          errorMessage = 'Ha ocurrido un error en la solicitud';
+          errorMessage = response.message;
           setCamposIncompletos(errorMessage);
         } else if (response.code === 500) {
           errorMessage = 'Ha ocurrido un error en el servidor';
@@ -96,6 +110,18 @@ const CreateUser = ({handleCloseModal}) => {
     }
   };
 
+
+  const getBorderStyle = (fieldName) => {
+    if (formState[fieldName] === '' && fieldName !== 'identificacion' && fieldName !== 'tipoIdentificacion') {
+      return { borderColor: '#E5664B' };
+    }
+    if (formState[fieldName] !== '' && fieldName !== 'identificacion' && fieldName !== 'tipoIdentificacion') {
+      return { borderColor: '#ced4da' };
+    }
+    return {};
+  };
+  
+  
   return (
     <Container >
       <Row className="justify-content-center">
@@ -113,6 +139,7 @@ const CreateUser = ({handleCloseModal}) => {
               value={formState.nombres}
               onChange={handleChange}
               required
+              style={getBorderStyle('nombres')}
             />
             </Form.Group>
 
@@ -123,7 +150,8 @@ const CreateUser = ({handleCloseModal}) => {
                     name="apellidos"
                     value={formState.apellidos}
                     onChange={handleChange}
-                    
+                    required
+                    style={getBorderStyle('apellidos')}
                   />
             </Form.Group>
               
@@ -134,6 +162,8 @@ const CreateUser = ({handleCloseModal}) => {
                 name="correo"
                 value={formState.correo}
                 onChange={handleChange}
+                required
+                style={getBorderStyle('correo')}
               />
             </Form.Group>
 
@@ -144,7 +174,8 @@ const CreateUser = ({handleCloseModal}) => {
                 name="telefonoMovil"
                 value={formState.telefonoMovil}
                 onChange={handleChange}
-                
+                required
+                style={getBorderStyle('telefonoMovil')}
               />
             </Form.Group>
 
@@ -155,7 +186,8 @@ const CreateUser = ({handleCloseModal}) => {
                 name="usuario"
                 value={formState.usuario}
                 onChange={handleChange}
-                
+                required
+                style={getBorderStyle('usuario')}
               />
             </Form.Group>
 
@@ -167,18 +199,19 @@ const CreateUser = ({handleCloseModal}) => {
                 value={formState.contrasenia}
                 onChange={handleChange}
                 required
+                style={getBorderStyle('contrasenia')}
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="company">
               <Form.Label>Empresa  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
-                as="select" // cambia el tipo de input a select
+                as="select"
                 name="idEmpresa"
                 value={formState.idEmpresa}
-                defaultValue={formState.idEmpresa[0]}
                 onChange={handleChange}
                 required
+                style={getBorderStyle('idEmpresa')}
               >
                 {Empresas.map((empresa) => (
                   <option key={empresa.nombre} value={empresa.id}>{empresa.nombre}</option>
@@ -194,8 +227,10 @@ const CreateUser = ({handleCloseModal}) => {
                 value={formState.tipoIdentificacion}
                 defaultValue={formState.tipoIdentificacion[0]}
                 onChange={handleChange}
-                required
+                style={getBorderStyle('tipoIdentificacion')}
+                
               >
+                <option value="">Seleccione...</option>
                 <option value="CED">Cedula de Ciudadania</option>
               </Form.Control>
             </Form.Group>
@@ -208,7 +243,7 @@ const CreateUser = ({handleCloseModal}) => {
                 name="identificacion"
                 value={formState.identificacion}
                 onChange={handleChange}
-                required
+                style={getBorderStyle('identificacion')}
               />
             </Form.Group>
 
@@ -221,6 +256,7 @@ const CreateUser = ({handleCloseModal}) => {
                 onChange={handleChange}
                 defaultValue={formState.estado[0]}
                 required
+                style={getBorderStyle('estado')}
               >
                 <option value="A">Activo</option>
                 <option value="I">Inactivo</option>
@@ -238,6 +274,7 @@ const CreateUser = ({handleCloseModal}) => {
                 >
                   Crear
                 </Button>
+                
               </Col>
               
             </Row>
