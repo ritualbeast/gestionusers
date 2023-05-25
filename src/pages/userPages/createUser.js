@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import '../../styles/createuser.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -7,7 +7,6 @@ import PersonIcon from '@material-ui/icons/Person';
 import { includes } from 'lodash';
 import Empresas from '../../_mock/empresas';
 import { CrearUsuario } from '../../services/Userservices';
-
 
 const CreateUser = ({handleCloseModal}) => {
 
@@ -26,12 +25,9 @@ const CreateUser = ({handleCloseModal}) => {
     estado : '',
   });
 
-
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
-
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,14 +95,6 @@ const CreateUser = ({handleCloseModal}) => {
       setError('Error al enviar el formulario');
     }
   };
-  
-  // useEffect(() => {
-  //   console.log(localStorage.getItem("nombreUsuario"));
-  //   const isAdmin = localStorage.getItem("nombreUsuario");
-  //   if (isAdmin === null) {
-  //     window.location.href = "/login";
-  //   }
-  // }, []);
 
   return (
     <Container >
@@ -117,7 +105,7 @@ const CreateUser = ({handleCloseModal}) => {
           
           <Form onSubmit={handleSubmit}>
           
-          <Form.Group  className='formuser' controlId="firstName">
+            <Form.Group  className='formuser' controlId="firstName">
             <Form.Label>Nombres <span className="required-asterisk">*</span></Form.Label>
             <Form.Control
               type="text"
@@ -126,9 +114,9 @@ const CreateUser = ({handleCloseModal}) => {
               onChange={handleChange}
               required
             />
-          </Form.Group>
+            </Form.Group>
 
-                <Form.Group className='formuser' controlId="lastName">
+            <Form.Group className='formuser' controlId="lastName">
                   <Form.Label>Apellidos  <span className="required-asterisk">*</span></Form.Label>
                   <Form.Control
                     type="text"
@@ -137,9 +125,8 @@ const CreateUser = ({handleCloseModal}) => {
                     onChange={handleChange}
                     
                   />
-                </Form.Group>
+            </Form.Group>
               
-
             <Form.Group className='formuser' controlId="email">
               <Form.Label>Correo Electronico  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
@@ -198,7 +185,6 @@ const CreateUser = ({handleCloseModal}) => {
                 ))}
               </Form.Control>
             </Form.Group>
-
 
             <Form.Group className='formuser' controlId="identificationType">
               <Form.Label>Tipo de Identificacion</Form.Label>

@@ -14,7 +14,7 @@ const navConfig = [
   {	
     title: 'Roles',
     path: '/role',
-    icon: icon('ic_user'),
+    icon: icon('ic_lock'),
   },
 
 ];

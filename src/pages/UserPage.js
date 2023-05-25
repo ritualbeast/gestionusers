@@ -85,16 +85,12 @@ export default function UserPage() {
   const [openModificar, setOpenModificar] = useState(false);
   const [openEliminar, setOpenEliminar] = useState(false);
   const [datosUser, setDatosUser] = useState([]);
-  const [datosaEliminar, setDatosaEliminar] = useState([]);
   const [isSelectUsed, setIsSelectUsed] = useState(false);
   const [isToolbarUsed, setIsToolbarUsed] = useState(false);
   const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
-  const [errores, setErrores] = useState([]);
   const [valorcheck, setValorcheck] = useState([]);
   const [valorcheck2, setValorcheck2] = useState('N');
   const [idUsuario, setIdUsuario] = useState('');
-  
-
   const [checkedItems, setCheckedItems] = useState({
     nombres: '',
     correo: '',
@@ -154,13 +150,11 @@ export default function UserPage() {
     setOpenModificar(false);
   };
 
-
   useEffect(() => {
     // verificarLocalStorage();
     fetchData();
 
   }, []);
-
   
   // const verificarLocalStorage = () => {
   //   const isAdmin = localStorage.getItem("nombreUsuario");
@@ -261,14 +255,10 @@ const handleCheckboxChange = (event) => {
   
 };
 
-
 const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  
-  
 
   return (
     <>
-       
       <Helmet>
         <title> User | Minimal UI </title>
       </Helmet>

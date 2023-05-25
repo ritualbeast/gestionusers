@@ -3,12 +3,10 @@ import '../../styles/modificaruser.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import Select from 'react-select';
 import PersonIcon from '@material-ui/icons/Person';
 import Empresas from '../../_mock/empresas';
-import { ActualizarUsuario, ObtenerUsuarioPorId } from '../../services/Userservices';
-
-
-
+import { ConsultarRolUsuario } from '../../services/Roleservices';
 
 const ModificarUser = (props) => {
   const { handleCloseModificar, userId, handleRefresh } = props;
@@ -28,10 +26,9 @@ const ModificarUser = (props) => {
     tipoIdentificacion : '',
     identificacion : '',
     estado : '',
+    Rol: []
   });
-
-  
-
+  const [consultaRol, setConsultaRol] = useState([]);
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
@@ -128,8 +125,27 @@ const ModificarUser = (props) => {
 
 
 
-  
-  
+  const handleOptionChange = (selectedOptions) => {
+    const selectedValues = selectedOptions.map((option) => option.value);
+    setFormState({ ...formState, Rol: selectedValues });
+  };
+
+  useEffect(() => {
+    consultarRol();
+  }, []);
+
+  const consultarRol = async () => {
+    try {
+      const response = await ConsultarRolUsuario();
+      console.log(response)
+      const roles = response.data.listRoles;
+      setConsultaRol(roles);
+    } catch (error) {
+      console.error('Error al consultar los roles:', error);
+      // Manejar el error de consulta de roles
+    }
+  };
+
 
   return (
     <Container >
@@ -139,7 +155,7 @@ const ModificarUser = (props) => {
           <h2>Editar Usuario</h2>
           < Form onSubmit={sendData}>
           
-          <Form.Group  className='formuser' controlId="firstName">
+            <Form.Group  className='formuser' controlId="firstName">
             <Form.Label>Nombres <span className="required-asterisk">*</span></Form.Label>
             <Form.Control
               type="text"
@@ -148,9 +164,9 @@ const ModificarUser = (props) => {
               onChange={handleChange}
               required
             />
-          </Form.Group>
+            </Form.Group>
 
-                <Form.Group className='formuser' controlId="lastName">
+            <Form.Group className='formuser' controlId="lastName">
                   <Form.Label>Apellidos  <span className="required-asterisk">*</span></Form.Label>
                   <Form.Control
                     type="text"
@@ -159,9 +175,8 @@ const ModificarUser = (props) => {
                     onChange={handleChange}
                     
                   />
-                </Form.Group>
-              
-
+            </Form.Group>
+            
             <Form.Group className='formuser' controlId="email">
               <Form.Label>Correo Electronico  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
@@ -221,7 +236,6 @@ const ModificarUser = (props) => {
               </Form.Control>
             </Form.Group>
 
-
             <Form.Group className='formuser' controlId="identificationType">
               <Form.Label>Tipo de Identificacion</Form.Label>
               <Form.Control
@@ -263,6 +277,16 @@ const ModificarUser = (props) => {
                 <option value="I">Inactivo</option>
               </Form.Control>
             </Form.Group>
+
+            <Form.Group className="formuser" controlId="rol">
+  <Form.Label>Rol <span className="required-asterisk">*</span></Form.Label>
+  <Select
+    options={consultaRol.map(rol => ({ value: rol.nombre, label: rol.nombre }))}
+    isMulti
+    onChange={handleOptionChange}
+  />
+</Form.Group>
+
             <br/> 
             
             <Row className="justify-content-center">
@@ -276,15 +300,6 @@ const ModificarUser = (props) => {
                   Modificar usuario
                 </Button>
               </Col>
-              <Col md={4}>
-                <Button onClick={revisarcampos}
-                  className="btnblock"
-                >
-                  Revisar
-                </Button>
-              </Col>
-              
-              
             </Row>
           </Form>
           <ToastContainer />
