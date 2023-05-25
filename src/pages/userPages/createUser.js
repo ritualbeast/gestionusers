@@ -235,8 +235,8 @@ const CreateUser = ({handleCloseModal}) => {
                 onChange={handleChange}
                 required
               >
-                <option value="Activo">Activo</option>
-                <option value="Inactivo">Inactivo</option>
+                <option value="A">Activo</option>
+                <option value="I">Inactivo</option>
               </Form.Control>
             </Form.Group>
             <br/> 

@@ -11,7 +11,7 @@ import { ActualizarUsuario, ObtenerUsuarioPorId } from '../../services/Userservi
 
 
 const ModificarUser = (props) => {
-  const { handleCloseModificar, userId } = props;
+  const { handleCloseModificar, userId, handleRefresh } = props;
   const [datosRecibidosporId, setDatosRecibidosporId] = useState([]);
   const [error, setError] = useState("");
   const [camposIncompletos, setCamposIncompletos] = useState([]);
@@ -39,7 +39,7 @@ const ModificarUser = (props) => {
   
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [handleRefresh]);
 
   const fetchData = async () => {
     try {
@@ -94,23 +94,27 @@ const ModificarUser = (props) => {
         setTimeout(() => {
           handleCloseModificar(false)
         }, 1500);
+        
+
       } else {
         // Manejo de errores de respuesta
         let errorMessage = 'Error al crear el usuario';
         if (response.code === 400) {
-          errorMessage = 'Ha ocurrido un error en la solicitud';
+          errorMessage = response.message;
           setCamposIncompletos(errorMessage);
         } else if (response.code === 500) {
-          errorMessage = 'Ha ocurrido un error en el servidor';
+          errorMessage = response.message;
         } else if (response.code === 401) {
-          errorMessage = 'No estás autorizado para realizar esta acción';
+          errorMessage = response.message;
         } else {
           errorMessage = 'Ha ocurrido un error inesperado';
         }
         setError(errorMessage);
         toast.error(errorMessage, {
+        
           // Configuración del toast
         });
+        
       }
     } catch (error) {
       console.error(error);
@@ -254,8 +258,8 @@ const ModificarUser = (props) => {
                 onChange={handleChange}
                 required
               >
-                <option value="Activo">Activo</option>
-                <option value="Inactivo">Inactivo</option>
+                <option value="A">Activo</option>
+                <option value="I">Inactivo</option>
               </Form.Control>
             </Form.Group>
             <br/> 

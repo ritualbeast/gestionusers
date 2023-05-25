@@ -10,8 +10,8 @@ import {Card,Table,  Stack,  Paper, Avatar,  Button, InputLabel,
   Typography,  IconButton, TableContainer, TablePagination, Box, Menu, Select, FormControl, FormControlLabel, FormGroup
 } from '@mui/material';
 
-import { toast } from 'react-toastify';
-import { Row, Col, Tab } from 'react-bootstrap';
+import { toast, ToastContainer } from 'react-toastify';
+import { Row, Col, Tab, Toast } from 'react-bootstrap';
 import CloseIcon from '@material-ui/icons/Close';
 // components
 import Iconify from '../components/iconify';
@@ -189,12 +189,34 @@ const handleFiltrar = async () => {
   try {
     const response = await ConsultaUsuarios(filterName, valorcheck2);
     if (response.success === true) {
-      toast.success(`${response.message}`
-        , {
-          position: "top-right",
-          autoClose: 2000,
-        });
+      console.log(response);
+      setDatosUser(response.data.row);
+      
     } else {
+      toast.error(`${response.message}`
+        , {
+          position: "bottom-right",
+          autoClose: 2000,
+
+        });
+    }
+
+    
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleEliminar = async () => {
+  try {
+    const response = await EliminarUsuario(idUsuario);
+    console.log(response);
+    if (response.success === true) {
+      fetchData();
+      handleCloseEliminar();
+      
+    }
+    else if (response.success === false) {
       toast.error(`${response.message}`
         , {
           position: "top-right",
@@ -202,20 +224,18 @@ const handleFiltrar = async () => {
         });
     }
 
-    setDatosUser(response.data.row);
   } catch (error) {
     console.error(error);
+    toast.error( `${error}` , {
+      position: "top-right",
+      autoClose: 2000,
+    });
+
   }
 };
 
-const handleEliminar = async () => {
-  console.log(idUsuario);
-  try {
-    const response = await EliminarUsuario(idUsuario);
-    console.log(response);
-  } catch (error) {
-    console.error(error);
-  }
+const handleRefresh = async () => {
+  await fetchData();
 };
 
 
@@ -306,6 +326,7 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
           variant="contained"  onClick={fetchData}>
             Limpiar
           </Button>
+          
         </div>
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
@@ -358,6 +379,7 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
               </Table>
             </TableContainer>
           </Scrollbar>
+          
 
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
@@ -454,8 +476,11 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
           <ModificarUser
             handleCloseModificar={handleCloseModificar} 
             userId={idUsuario}
+            handleRefresh = {handleRefresh}
           />
+          
         </Box>
+        
       </Modal>
       <Modal
         open={openEliminar}
@@ -481,6 +506,8 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
             </Col>
           </Row>  
         </Container>
+        
+        <ToastContainer />
         </Box>
       </Modal>
     </>

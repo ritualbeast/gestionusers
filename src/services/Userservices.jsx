@@ -161,7 +161,7 @@ const EliminarUsuario = async (userId) => {
       method: 'DELETE',
       headers,
     };
-    const response = await fetch(`http://localhost:8989/goit-security-api/v2/usuario/eliminarUsuario/${userId}`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/eliminarUsuario/${userId}`, requestOptions);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -214,7 +214,7 @@ const ActualizarUsuario = async (userId, userData) => {
       headers,
       body: JSON.stringify(userData)
     };
-    const response = await fetch(`http://localhost:8989/goit-security-api/v2/usuario/actualizar/${userId}`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/actualizar/${userId}`, requestOptions);
     const data = await response.json();
     console.log(data);
     return data;
