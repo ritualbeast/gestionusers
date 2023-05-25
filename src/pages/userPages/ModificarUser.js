@@ -9,12 +9,8 @@ import Empresas from '../../_mock/empresas';
 import { ConsultarRolUsuario } from '../../services/Roleservices';
 
 const ModificarUser = (props) => {
-  const { handleCloseModificar, userId, handleRefresh } = props;
-  const [datosRecibidosporId, setDatosRecibidosporId] = useState([]);
-  const [error, setError] = useState("");
-  const [camposIncompletos, setCamposIncompletos] = useState([]);
-
-
+  const { handleCloseModificar, userId } = props;
+  // cambios
   const [formState, setFormState] = useState({
     nombres : '',
     apellidos : '',
