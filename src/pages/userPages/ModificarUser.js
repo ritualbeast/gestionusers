@@ -10,7 +10,7 @@ import { ConsultarRolUsuario } from '../../services/Roleservices';
 
 const ModificarUser = (props) => {
   const { handleCloseModificar, userId } = props;
-  // cambios
+  // cambios nuevos
   const [formState, setFormState] = useState({
     nombres : '',
     apellidos : '',
