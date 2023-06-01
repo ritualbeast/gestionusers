@@ -163,7 +163,6 @@ export default function UserPage() {
   //   }
   // }
   const fetchData = async () => {
-    console.log('ok')
     try {
       // clear checkitems
       setCheckedItems({
@@ -289,18 +288,19 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
               onChange={handleCheckboxChange}
               renderValue={(selected) => selected.join(', ')}
             >
-              <MenuItem >
-                <Checkbox checked={checkedItems.nombres} onChange={handleCheckboxChange} name="nombres" value='N' />
+              <MenuItem>
+                <Checkbox checked={!!checkedItems.nombres} onChange={handleCheckboxChange} name="nombres" value='N' />
                 <InputLabel>Nombres</InputLabel>
               </MenuItem>
-              <MenuItem >
-                <Checkbox checked={checkedItems.correo} onChange={handleCheckboxChange} name="correo" value='C' />
+              <MenuItem>
+                <Checkbox checked={!!checkedItems.correo} onChange={handleCheckboxChange} name="correo" value='C' />
                 <InputLabel>Correo</InputLabel>
               </MenuItem>
-              <MenuItem >
-                <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" value='E' />
+              <MenuItem>
+                <Checkbox checked={!!checkedItems.estado} onChange={handleCheckboxChange} name="estado" value='E' />
                 <InputLabel>Estado</InputLabel>
               </MenuItem>
+
             </Select>
           </FormControl>
           

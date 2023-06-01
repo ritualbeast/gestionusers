@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../styles/createuser.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -7,6 +7,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import { includes } from 'lodash';
 import Empresas from '../../_mock/empresas';
 import { CrearUsuario } from '../../services/Userservices';
+import { ConsultarEmpresas } from '../../services/Empresaservices';
 
 const CreateUser = ({handleCloseModal}) => {
 
@@ -24,6 +25,10 @@ const CreateUser = ({handleCloseModal}) => {
     identificacion: "",
     estado: "A",
   });
+
+  useEffect(() => { 
+    consultarEmpresas();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -121,6 +126,17 @@ const CreateUser = ({handleCloseModal}) => {
     return {};
   };
   
+  // crear consumo empresa
+  const [empresas, setEmpresas] = useState([]);
+  const consultarEmpresas = async () => {
+    try {
+      const response = await  ConsultarEmpresas();
+      console.log(response.data.row);
+      setEmpresas(response.data.row);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   
   return (
     <Container >
@@ -140,6 +156,7 @@ const CreateUser = ({handleCloseModal}) => {
               onChange={handleChange}
               required
               style={getBorderStyle('nombres')}
+              placeholder='Nombres'
             />
             </Form.Group>
 
@@ -152,6 +169,7 @@ const CreateUser = ({handleCloseModal}) => {
                     onChange={handleChange}
                     required
                     style={getBorderStyle('apellidos')}
+                    placeholder='Apellidos'
                   />
             </Form.Group>
               
@@ -164,6 +182,7 @@ const CreateUser = ({handleCloseModal}) => {
                 onChange={handleChange}
                 required
                 style={getBorderStyle('correo')}
+                placeholder='Correo Electronico'
               />
             </Form.Group>
 
@@ -176,6 +195,7 @@ const CreateUser = ({handleCloseModal}) => {
                 onChange={handleChange}
                 required
                 style={getBorderStyle('telefonoMovil')}
+                placeholder='Telefono movil'
               />
             </Form.Group>
 
@@ -188,6 +208,7 @@ const CreateUser = ({handleCloseModal}) => {
                 onChange={handleChange}
                 required
                 style={getBorderStyle('usuario')}
+                placeholder='Usuario'
               />
             </Form.Group>
 
@@ -200,21 +221,23 @@ const CreateUser = ({handleCloseModal}) => {
                 onChange={handleChange}
                 required
                 style={getBorderStyle('contrasenia')}
+                placeholder='Contraseña'
               />
             </Form.Group>
 
             <Form.Group className='formuser' controlId="company">
-              <Form.Label>Empresa  <span className="required-asterisk">*</span></Form.Label>
+              <Form.Label>Empresa <span className="required-asterisk">*</span></Form.Label>
+              
               <Form.Control
                 as="select"
                 name="idEmpresa"
-                value={formState.idEmpresa}
-                onChange={handleChange}
+                onChange={handleChange} // Pasar el evento completo en lugar de event.target.value
                 required
+                value={formState.idEmpresa}
                 style={getBorderStyle('idEmpresa')}
               >
-                {Empresas.map((empresa) => (
-                  <option key={empresa.nombre} value={empresa.id}>{empresa.nombre}</option>
+                {empresas.map((empresa) => (
+                  <option key={empresa.idEmpresa} value={empresa.idEmpresa}>{empresa.nombre}</option> // Agregar value={empresa.idEmpresa} al option
                 ))}
               </Form.Control>
             </Form.Group>
@@ -244,6 +267,7 @@ const CreateUser = ({handleCloseModal}) => {
                 value={formState.identificacion}
                 onChange={handleChange}
                 style={getBorderStyle('identificacion')}
+                placeholder='Identificacion'
               />
             </Form.Group>
 

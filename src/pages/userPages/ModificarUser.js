@@ -6,8 +6,10 @@ import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import Select from 'react-select';
 import PersonIcon from '@material-ui/icons/Person';
 import Empresas from '../../_mock/empresas';
-import { ConsultarRolUsuario, AsignarRolUsuario } from '../../services/Roleservices';
+import { ConsultarRolUsuario, AsignarRolUsuario, ActualizarRolUsuario } from '../../services/Roleservices';
 import { ObtenerUsuarioPorId, ActualizarUsuario } from '../../services/Userservices';
+import { ConsultarEmpresas } from '../../services/Empresaservices';
+import { ConsultarRoles } from '../../services/ServicesRol';
 
 const ModificarUser = (props) => {
   const { handleCloseModificar, userId, handleRefresh 
@@ -19,6 +21,11 @@ const ModificarUser = (props) => {
   const [consultaRol, setConsultaRol] = useState([]);
   const [consultarRol2, setConsultarRol2] = useState([]);
   const [UsuarioCreacion, setUsuarioCreacion] = useState([]);
+  const [formStateRol, setFormStateRol] = useState([]);
+  const [formStateRolBase, setFormStateRolBase] = useState([]);
+  const [userName, setUserName] = useState(localStorage.getItem('nombreUsuario'));
+  const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState([]);
+  
   const [formState, setFormState] = useState({
     nombres : '',
     apellidos : '',
@@ -32,8 +39,31 @@ const ModificarUser = (props) => {
     estado : '',
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  useEffect(() => {
+    console.log(opcionesSeleccionadas)
+    const objeTemp = [];
+
+    opcionesSeleccionadas.forEach((op)=>{
+        consultaRol.forEach((rol)=>{
+          if(op.value === rol.nombre){
+            objeTemp.push(
+              {
+                "idRol": rol.idRol ,
+                "descripcion": rol.descripcion,
+                "estado": rol.estado,
+                "usuarioCreacion": userName
+              }
+            );
+          }
+        })
+    })
+
+  setFormStateRol(objeTemp);
+  console.log('objeTemp: ', objeTemp)
+}, [opcionesSeleccionadas]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
   
     let sanitizedValue = value;
   
@@ -127,14 +157,56 @@ const ModificarUser = (props) => {
         });
         
       }
+      
+      // Actualizar el rol existente
+      console.log('roles del usuario:', formStateRol);
+
+      const objSendI = [];
+      formStateRolBase.forEach(element => {
+        let validate=false;
+        formStateRol.forEach(el => {
+          if (element.idRol === el.idRol) { 
+            console.log('element.idRol', element.idRol);
+            console.log('el.idRol', el.idRol);         
+
+            validate=true
+          }   
+        });
+        console.log(validate);
+        if (validate === false) console.log('inactiva:', element.idRol)
+        if (!validate) element.estado = 'I';
+        if (!validate) objSendI.push(element);
+      });
+
+      console.log(formStateRolBase)
+      console.log(formStateRol)
+      console.log(objSendI)
+
+
+      let objSend = [];
+
+      if (objSendI.length !== 0) {
+        objSend = formStateRol;
+        objSendI.forEach((data) =>{
+          objSend.push(data);
+        })
+        
+      }else{
+        objSend = formStateRol
+      }
+
+      console.log('objSend', objSend)
+
+      const responseActualizarRol = await ActualizarRolUsuario(userId, objSend);
+      console.log(responseActualizarRol.success);
     } catch (error) {
       console.error(error);
-      setError('Error al enviar el frmulario');
+      setError('Error al enviar el formulario');
       toast.error('Ha ocurrido un error inesperado, contacta al soporte técnico para obtener ayuda', {
         // Configuración del toast para el error capturado
       });
     }
-  };
+  };  
 
 
 
@@ -146,6 +218,9 @@ const ModificarUser = (props) => {
 
   useEffect(() => {
     consultarUsuario();
+    consultarEmpresas();
+    consultarRol();
+    rolesGenerales();
   }, []);
 
   const consultarUsuario = async () => {
@@ -172,23 +247,66 @@ const ModificarUser = (props) => {
   };
 
 
+ 
+  const revisar = () => {
+    console.log(formState);
+  };
+ 
+ 
+  // cambios nuevos
   const consultarRol = async () => {
     try {
-      const response = await ConsultarRolUsuario();
+
+      const response = await ConsultarRolUsuario(userId);
       
       const roles = response.data.listRoles;
-      setConsultaRol(roles);
-      const roles2 = response.data;
-      setConsultarRol2(roles2);
-      console.log(consultarRol2);
+      setOpcionesSeleccionadas(roles.map((rol) => ({ 
+        value: rol.nombre, 
+        label: rol.nombre,
+        idEmpresa: rol.nombre,
+        idUsuario: rol.nombre,
+        usuario: rol.nombre
+      })));
+
+      const objeTemp = [];
+
+
+      roles.forEach((rol)=>{
+          objeTemp.push(
+            {
+              "idRol": rol.idRol ,
+              "descripcion": rol.descripcion,
+              "estado": rol.estado,
+              "usuarioCreacion": userName
+            }
+          );
+
+      })
+      setFormStateRolBase(objeTemp)
+
     } catch (error) {
       console.error('Error al consultar los roles:', error);
       // Manejar el error de consulta de roles
     }
   };
-  const revisar = () => {
-    console.log(formState);
+
+
+  const rolesGenerales = async () => {
+    try {
+      const response = await ConsultarRoles();
+      
+      const roles = response.data.listRoles;
+      console.log(roles);
+      setConsultaRol(roles);
+    } catch (error) {
+      console.error('Error al consultar los roles:', error);
+    }
   };
+
+
+
+  const opcionesRol = consultaRol.map((rol) => ({ value: rol.nombre, label: rol.nombre }));
+
 
   const getBorderStyle = (fieldName) => {
     if (formState[fieldName] === '' && fieldName !== 'identificacion' && fieldName !== 'tipoIdentificacion') {
@@ -199,6 +317,22 @@ const ModificarUser = (props) => {
     }
     return {};
   };
+    // crear consumo empresa
+    const [empresas, setEmpresas] = useState([]);
+    const consultarEmpresas = async () => {
+      try {
+        const response = await  ConsultarEmpresas();
+        console.log(response.data.row);
+        setEmpresas(response.data.row);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const handleOptionDelete = (removedOption) => {
+      const updatedOptions = opcionesSeleccionadas.filter(option => option !== removedOption);
+      setOpcionesSeleccionadas(updatedOptions);
+    };
+    
 
   return (
     <Container >
@@ -280,23 +414,24 @@ const ModificarUser = (props) => {
                 style={getBorderStyle('contrasenia')}
               />
             </Form.Group>
-
+            
             <Form.Group className='formuser' controlId="company">
-              <Form.Label>Empresa  <span className="required-asterisk">*</span></Form.Label>
+              <Form.Label>Empresa <span className="required-asterisk">*</span></Form.Label>
+              
               <Form.Control
-                as="select" // cambia el tipo de input a select
+                as="select"
                 name="idEmpresa"
-                value={formState.idEmpresa}
-                defaultValue={formState.idEmpresa[0]}
-                onChange={handleChange}
+                onChange={handleChange} // Pasar el evento completo en lugar de event.target.value
                 required
+                value={formState.idEmpresa}
                 style={getBorderStyle('idEmpresa')}
               >
-                {Empresas.map((empresa) => (
-                  <option key={empresa.nombre} value={empresa.id}>{empresa.nombre}</option>
+                {empresas.map((empresa) => (
+                  <option key={empresa.idEmpresa} value={empresa.idEmpresa}>{empresa.nombre}</option> // Agregar value={empresa.idEmpresa} al option
                 ))}
               </Form.Control>
             </Form.Group>
+
 
             <Form.Group className='formuser' controlId="identificationType">
               <Form.Label>Tipo de Identificacion</Form.Label>
@@ -341,6 +476,29 @@ const ModificarUser = (props) => {
                 <option value="A">Activo</option>
                 <option value="I">Inactivo</option>
               </Form.Control>
+            </Form.Group>
+
+            <Form.Group className="formuser" controlId="rol">
+              <Form.Label>Rol <span className="required-asterisk">*</span></Form.Label>
+                <Select
+                  options={opcionesRol}
+                  isMulti
+                  value={opcionesSeleccionadas}
+                  onChange={handleOptionChange}
+                  components={{
+                    MultiValueRemove: ({ innerProps, data }) => (
+                      <span id='rolSpan'
+                        {...innerProps}
+                        onClick={() => handleOptionDelete(data)}
+                        onKeyPress={() => {}}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        &times;
+                      </span>
+                    )
+                  }}
+                />
             </Form.Group>
 
 
