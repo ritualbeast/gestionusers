@@ -10,6 +10,7 @@ const LoginToken = async (usuario, contrasenia) => {
     
     const canales = process.env.REACT_APP_CANALES;
     const token = `Basic ${base64.encode(`${usuario}:${contrasenia}`)}`;
+    console.log(token)
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': token,
@@ -102,45 +103,47 @@ const ConsultaUsuarios = async (filterName='T', checkedItems='E') => {
 };
 
 const CrearUsuario = async (datosUsuario) => {
+  const tokenUsuario = localStorage.getItem('token');
+  const canales = process.env.REACT_APP_CANALES;
+  const token = `Bearer ${tokenUsuario}`;
+  const headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'Authorization': token,
+    'Canal': canales
+  };
+
+  // Codificar la contraseña en base64
   
+    
+  const body = {
+    "usuario": datosUsuario.usuario,
+    "contrasenia": datosUsuario.contrasenia,
+    "idEmpresa": datosUsuario.idEmpresa,
+    "correo": datosUsuario.correo,
+    "nombres": datosUsuario.nombres,
+    "apellidos": datosUsuario.apellidos,
+    "telefonoMovil": datosUsuario.telefonoMovil,
+    "estado": datosUsuario.estado,
+    "tipoIdentificacion": datosUsuario.tipoIdentificacion,
+    "identificacion": datosUsuario.identificacion
+  };
+
+  const requestOptions = {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body)
+  };
   try {
-    const tokenUsuario = localStorage.getItem('token');
-    const canales = process.env.REACT_APP_CANALES;
-    const token = `Bearer ${tokenUsuario}`;
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      'Authorization': token,
-      'Canal': canales
-    };
-    const body = {
-      "usuario": datosUsuario.usuario,
-      "contrasenia": datosUsuario.contrasenia,
-      "idEmpresa": datosUsuario.idEmpresa,
-      "correo": datosUsuario.correo,
-      "nombres": datosUsuario.nombres,
-      "apellidos": datosUsuario.apellidos,
-      "telefonoMovil": datosUsuario.telefonoMovil,
-      "estado": datosUsuario.estado,
-      "tipoIdentificacion": datosUsuario.tipoIdentificacion,
-      "identificacion": datosUsuario.identificacion
-    };
-    const requestOptions = {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body)
-    };
     const response = await fetch('http://desa.goitsa.me:8988/goit-security-api/v2/usuario/crearUsuario', requestOptions);
     const data = await response.json();
-    
-
     return data; // Devolver los datos obtenidos
-
   } catch (error) {
     console.error(error);
     throw error; // Lanzar el error para que sea capturado en el lugar donde se llama a la función
   }
 };
+
 
 
 const EliminarUsuario = async (userId) => {

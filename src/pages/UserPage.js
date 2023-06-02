@@ -439,6 +439,7 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
         </IconButton>
             <CreateUser  
              handleCloseModal={handleCloseModal}
+             handleRefresh = {fetchData}
              />
         </Box>
       </Modal>

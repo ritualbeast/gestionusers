@@ -9,8 +9,8 @@ import Empresas from '../../_mock/empresas';
 import { CrearUsuario } from '../../services/Userservices';
 import { ConsultarEmpresas } from '../../services/Empresaservices';
 
-const CreateUser = ({handleCloseModal}) => {
-
+const CreateUser = ({handleCloseModal, handleRefresh}) => {
+  
   const [error, setError] = useState("");
   const [camposIncompletos, setCamposIncompletos] = useState([]);
   const [formState, setFormState] = useState({
@@ -30,8 +30,8 @@ const CreateUser = ({handleCloseModal}) => {
     consultarEmpresas();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (event) => {
+    const { name, value } = event.target;
   
     let sanitizedValue = value;
   
@@ -46,6 +46,7 @@ const CreateUser = ({handleCloseModal}) => {
       [name]: sanitizedValue,
     }));
   };
+
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,6 +85,7 @@ const CreateUser = ({handleCloseModal}) => {
         setTimeout(() => {
           handleCloseModal(false)
         }, 1500);
+        handleRefresh();
       } else {
         let errorMessage = 'Error al crear el usuario';
         if (response.code === 400) {

@@ -117,8 +117,6 @@ const ModificarUser = (props) => {
       console.error(error);
     }
   };
-
-
  
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -155,7 +153,6 @@ const ModificarUser = (props) => {
         
           // Configuración del toast
         });
-        
       }
       
       // Actualizar el rol existente

@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { filter, set } from 'lodash';
+import { filter } from 'lodash';
 import { useEffect, useState } from 'react';
 // @mui
 import {
@@ -7,7 +7,6 @@ import {
   Table,
   Stack,
   Button,
-  Popover,
   Paper,
   TableRow,
   MenuItem,
@@ -18,6 +17,7 @@ import {
   TableCell,
   Container,
   Typography,
+  Menu,
   IconButton,
   Select,
   FormControl,
@@ -26,8 +26,8 @@ import {
   Box
 } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
-import SearchIcon from '@mui/icons-material/Search';
 import { Row, Col } from 'react-bootstrap';
+import CloseIcon from '@material-ui/icons/Close';
 import '../styles/roles.css'
 // components
 import Iconify from '../components/iconify';
@@ -36,8 +36,8 @@ import Scrollbar from '../components/scrollbar';
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 // mock
 import CreateRole from './roles/createRole';
-import Editar from './roles/editar';
-import { ConsultarRoles } from '../services/ServicesRol';
+import ModificarRole from './roles/ModificarRole';
+import { ConsultarRoles, EliminarRol } from '../services/ServicesRol';
 
 // ----------------------------------------------------------------------
 
@@ -68,17 +68,23 @@ function getComparator(order, orderBy) {
 }
 
 function applySortFilter(array, comparator, query) {
+  if (!Array.isArray(array)) {
+    return []; // o cualquier otro valor predeterminado según tus necesidades
+  }
+
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
     return a[1] - b[1];
   });
+
   if (query) {
     return filter(stabilizedThis.map((el) => el[0]), (_user) =>
-      _user.nombres.toLowerCase().indexOf(query.toLowerCase()) !== -1
+      _user.nombre.toLowerCase().indexOf(query.toLowerCase()) !== -1
     );
   }
+
   return stabilizedThis.map((el) => el[0]);
 }
 
@@ -86,53 +92,35 @@ export default function UserPage() {
   const [open, setOpen] = useState(null);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('name');
-  const [openModal, setOpenModal] = useState(false);
-  const [openModal2, setOpenModal2] = useState(false);
-  const [openEliminar, setOpenEliminar] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selected, setSelected] = useState([]);
-  const [datosRole, setDatosRole] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [searchValue, setSearchValue] = useState('');
-  const [isSelectUsed, setIsSelectUsed] = useState(false);
-  const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
-  const [datosUser, setDatosUser] = useState([]);
-  const [isToolbarUsed, setIsToolbarUsed] = useState(false);
+  const [orderBy, setOrderBy] = useState('name');
   const [filterName, setFilterName] = useState('A');
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [openModal, setOpenModal] = useState(false);
+  const [openModificar, setOpenModificar] = useState(false);
+  const [openEliminar, setOpenEliminar] = useState(false);
+  const [datosUser, setDatosUser] = useState([]);
+  const [isSelectUsed, setIsSelectUsed] = useState(false);
+  const [isToolbarUsed, setIsToolbarUsed] = useState(false); // Cambiar el orden
+  const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
   const [valorcheck, setValorcheck] = useState([]);
   const [valorcheck2, setValorcheck2] = useState('N');
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [datosRole, setDatosRole] = useState([]);
 
   const [checkedItems, setCheckedItems] = useState({
-    nombres: '',
-    correo: '',
+    nombre: '',
+    descripcion: '',
     estado: '',
-  });
-
-  const searchRoles = () => {
-    const keyword = searchValue.toLowerCase();
-  
-    const filteredRoles = datosRole.filter((role) => {
-      return (
-        role.name.toLowerCase().includes(keyword) ||
-        role.username.toLowerCase().includes(keyword) ||
-        role.email.toLowerCase().includes(keyword) ||
-        role.phone.toLowerCase().includes(keyword)
-      );
-    });
-    return filteredRoles;
-  };  
+  });  
   
   const handleOpenMenu = (event, userId) => {
+    
     setOpen(event.currentTarget);
+    console.log(userId)
     setSelectedUserId(userId);
+    console.log(selectedUserId)
   };
-  
-  const handleDeleteRole = () => {
-    const updatedRoles = datosRole.filter((role) => role.id !== selectedUserId);
-    setDatosRole(updatedRoles);
-    setOpen(null);
-  };  
 
   const handleCloseMenu = () => {
     setOpen(null);
@@ -140,6 +128,7 @@ export default function UserPage() {
 
   const handleOpenEliminar = () => {
     setOpenEliminar(true);
+    handleCloseMenu();
   };
 
   const handleCloseEliminar = () => {
@@ -157,6 +146,15 @@ export default function UserPage() {
     setOpenModal(false);
   };
 
+  const handleOpenModificar = () => {
+    setOpenModificar(true);
+    handleCloseMenu();
+  };
+
+  const handleCloseModificar = () => {
+    setOpenModificar(false);
+  };
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -169,9 +167,10 @@ export default function UserPage() {
   const handleFilterByName = (event) => {
     setPage(0);
     setFilterName(event.target.value);
-    setIsToolbarUsed(true);
     if (!event.target.value) {
       setIsToolbarUsed(false);
+    } else {
+      setIsToolbarUsed(true);
     }
   };
 
@@ -192,8 +191,8 @@ export default function UserPage() {
     try {
       // clear checkitems
       setCheckedItems({
-        nombres: '',
-        correo: '',
+        nombre: '',
+        descripcion: '',
         estado: '',
       });
       setFilterName('');
@@ -207,6 +206,7 @@ export default function UserPage() {
 
 const handleFiltrar = async () => {
   try {
+    console.log(filterName,valorcheck2)
     const response = await ConsultarRoles(filterName, valorcheck2);
     if (response.success === true) {
       console.log(response);
@@ -217,42 +217,39 @@ const handleFiltrar = async () => {
         , {
           position: "bottom-right",
           autoClose: 2000,
-
         });
     }
-
-    
   } catch (error) {
     console.error(error);
   }
 };
 
-// const handleEliminar = async () => {
-//   try {
-//     const response = await EliminarUsuario(idUsuario);
-//     console.log(response);
-//     if (response.success === true) {
-//       fetchData();
-//       handleCloseEliminar();
+const handleEliminar = async () => {
+  try {
+    const response = await EliminarRol(selectedUserId);
+    console.log(response);
+    if (response.success === true) {
+      fetchData();
+      handleCloseEliminar();
       
-//     }
-//     else if (response.success === false) {
-//       toast.error(`${response.message}`
-//         , {
-//           position: "top-right",
-//           autoClose: 2000,
-//         });
-//     }
+    }
+    else if (response.success === false) {
+      toast.error(`${response.message}`
+        , {
+          position: "top-right",
+          autoClose: 2000,
+        });
+    }
 
-//   } catch (error) {
-//     console.error(error);
-//     toast.error( `${error}` , {
-//       position: "top-right",
-//       autoClose: 2000,
-//     });
+  } catch (error) {
+    console.error(error);
+    toast.error( `${error}` , {
+      position: "top-right",
+      autoClose: 2000,
+    });
 
-//   }
-// };
+  }
+};
 
 const handleRefresh = async () => {
   await fetchData();
@@ -279,40 +276,14 @@ const handleCheckboxChange = (event) => {
   
   
 };
-  const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  const paginatedData = filteredUsers.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  
+
   return (
     <>
       <Helmet>
         <title> Role | Minimal UI </title>
       </Helmet>
-      
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Box sx={{ width: '50%' }}>
-          <CreateRole />
-        </Box>
-      </Modal>
-
-      <Modal
-        open={openModal2}
-        onClose={() => setOpenModal2(false)}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent:'center',
-        }}
-        >
-        <Box sx={{width:'50%'}}>
-          <Editar />
-        </Box>
-      </Modal>
 
       <Container>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
@@ -339,12 +310,12 @@ const handleCheckboxChange = (event) => {
                   renderValue={(selected) => selected.join(', ')}
                 >
                   <MenuItem >
-                    <Checkbox checked={checkedItems.nombres} onChange={handleCheckboxChange} name="nombres" value='N' />
-                    <InputLabel>Nombres</InputLabel>
+                    <Checkbox checked={checkedItems.nombre} onChange={handleCheckboxChange} name="nombre" value='No' />
+                    <InputLabel>Nombre</InputLabel>
                   </MenuItem>
                   <MenuItem >
-                    <Checkbox checked={checkedItems.correo} onChange={handleCheckboxChange} name="correo" value='C' />
-                    <InputLabel>Correo</InputLabel>
+                    <Checkbox checked={checkedItems.descripcion} onChange={handleCheckboxChange} name="descripcion" value='De' />
+                    <InputLabel>Descripción</InputLabel>
                   </MenuItem>
                   <MenuItem >
                     <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" value='E' />
@@ -373,7 +344,9 @@ const handleCheckboxChange = (event) => {
                             headLabel={TABLE_HEAD}
                           />
                           <TableBody>
+                          
                             {Array.isArray(paginatedData) && paginatedData.map((user, index) => (
+                              
                               <TableRow key={user.idRol}>
                                 <TableCell> 
                                   {index + 1}
@@ -383,7 +356,7 @@ const handleCheckboxChange = (event) => {
                                 <TableCell>{user.nemonico}</TableCell>
                                 <TableCell>{user.estado}</TableCell>
                                 <TableCell align="center">
-                                  <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idUsuario)}>
+                                  <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idRol)}>
                                     <Iconify icon={'eva:more-vertical-fill'} />
                                   </IconButton>
                                 </TableCell>
@@ -428,10 +401,10 @@ const handleCheckboxChange = (event) => {
           </Card>
       </Container>
 
-      <Popover
+      <Menu
         open={Boolean(open)}
-        anchorEl={open}
         onClose={handleCloseMenu}
+        anchorEl={open}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         PaperProps={{
@@ -446,7 +419,7 @@ const handleCheckboxChange = (event) => {
           },
         }}
       >
-        <MenuItem onClick={() => setOpenModal2(true)}> 
+        <MenuItem onClick={handleOpenModificar}>
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
           Editar
         </MenuItem>
@@ -455,7 +428,69 @@ const handleCheckboxChange = (event) => {
           <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
           Eliminar
         </MenuItem>
-      </Popover>
+      </Menu>
+
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{
+          width: '90%',
+          maxWidth: '600px',
+          maxHeight: '80vh',
+          p: '1rem',
+          bgcolor: '#f7f7f7',
+          borderRadius: '4px',
+          boxShadow: '0 0 20px rgba(0, 0, 0, 0.2)',
+          overflowY: 'auto',
+          
+        }}>
+          <IconButton onClick={handleCloseModal} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
+          <CloseIcon />
+        </IconButton>
+            <CreateRole  
+             handleCloseModal={handleCloseModal}
+             handleRefresh={fetchData}
+             />
+        </Box>
+      </Modal>
+
+      <Modal
+        open={openModificar}
+        onClose={handleCloseModificar}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{
+          width: '90%',
+          maxWidth: '600px',
+          maxHeight: '80vh',
+          p: '1rem',
+          bgcolor: '#f7f7f7',
+          borderRadius: '4px',
+          boxShadow: '0 0 20px rgba(0, 0, 0, 0.2)',
+          overflowY: 'auto',
+        }}>
+          <IconButton onClick={handleCloseModificar} style={{ position: 'absolute', top: 0, right: 0, color: 'white' }}>
+            <CloseIcon />
+          </IconButton>
+          <ModificarRole
+            handleCloseModificar={handleCloseModificar} 
+            roleId={selectedUserId}
+            handleRefresh = {fetchData}
+          />
+          
+        </Box>
+        
+      </Modal>
 
       <Modal
         open={openEliminar}
@@ -470,7 +505,9 @@ const handleCheckboxChange = (event) => {
               Desea eliminar el usuario?
             </Col>
             <Col>
-              <Button className='buttondeleteuser' variant="contained" color="primary" onClick={handleDeleteRole}>
+              <Button className='buttondeleteuser' variant="contained" color="primary"
+              onClick={handleEliminar}
+              >
                 Eliminar
               </Button>
               <Button className='buttondeleteuser' variant="contained" color="primary" onClick={handleCloseEliminar}>
@@ -479,6 +516,8 @@ const handleCheckboxChange = (event) => {
             </Col>
           </Row>  
         </Container>
+        
+        <ToastContainer />
         </Box>
       </Modal>
     </>
