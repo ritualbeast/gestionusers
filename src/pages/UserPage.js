@@ -1,7 +1,7 @@
 
 import { Helmet } from 'react-helmet-async';
 import { filter, set } from 'lodash';
-import {  useState, useEffect, useContext } from 'react';
+import {  useState, useEffect } from 'react';
 
 // @mui
 import {Card,Table,  Stack,  Paper, Avatar,  Button, InputLabel,
@@ -107,6 +107,7 @@ export default function UserPage() {
   };
   const handleOpenEliminar = () => {
     setOpenEliminar(true);
+    handleCloseMenu();
   };
 
   const handleCloseEliminar = () => {
@@ -144,6 +145,7 @@ export default function UserPage() {
   };
   const handleOpenModificar = () => {
     setOpenModificar(true);
+    handleCloseMenu();
   };
 
   const handleCloseModificar = () => {
@@ -259,7 +261,7 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
   return (
     <>
       <Helmet>
-        <title> User | Minimal UI </title>
+        <title> User </title>
       </Helmet>
       
       <Container>

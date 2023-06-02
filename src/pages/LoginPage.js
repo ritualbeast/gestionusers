@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 // @mui
 import { styled } from '@mui/material/styles';
-import { Link, Container, Typography, Divider, Stack, Button } from '@mui/material';
+import { Link, Container, Typography, Divider, Stack, Button, Box } from '@mui/material';
 // hooks
 import useResponsive from '../hooks/useResponsive';
 // components
@@ -9,6 +9,7 @@ import Logo from '../components/logo';
 import Iconify from '../components/iconify';
 // sections
 import { LoginForm } from '../sections/auth/login';
+import logo from '../assets/img/ic_goit.png';
 
 // ----------------------------------------------------------------------
 
@@ -46,17 +47,26 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Login | Minimal UI </title>
+        <title> Login  </title>
       </Helmet>
 
       <StyledRoot>
-        <Logo
-          sx={{
-            position: 'fixed',
-            top: { xs: 16, sm: 24, md: 40 },
-            left: { xs: 16, sm: 24, md: 40 },
-          }}
-        />
+        <Box sx={{ px: 2.5, py: 3, display: 'inline-flex' }}>
+          {logo && (
+            <Box
+              component="img"
+              src={logo}
+              sx={{
+                position: 'fixed',
+                width: 80, height: 40,
+                top: { xs: 16, sm: 24, md: 40 },
+                left: { xs: 16, sm: 24, md: 40 },
+              }}
+              color="inherit"
+            />
+          )}
+          
+        </Box>
 
         {mdUp && (
           <StyledSection>

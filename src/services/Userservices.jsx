@@ -21,6 +21,7 @@ const LoginToken = async (usuario, contrasenia) => {
     };
     const response = await fetch(process.env.REACT_APP_API_TOKEN, requestOptions);
     const data = await response.json();
+    console.log(data);
    
     // Guardar los valores en el localStorage
     localStorage.setItem('token', data.data.token);
