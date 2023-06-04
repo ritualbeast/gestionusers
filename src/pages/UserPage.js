@@ -52,6 +52,8 @@ function descendingComparator(a, b, orderBy) {
   return 0;
 }
 
+console.log("u");
+
 function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
