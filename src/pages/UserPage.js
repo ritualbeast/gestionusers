@@ -19,13 +19,11 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import { ConsultaUsuarios, ValidarToken, EliminarUsuario } from '../services/Userservices';
+import { ConsultaUsuarios, ValidarToken, EliminarUsuario, ConsultarCanal } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
 import ModificarUser from './userPages/ModificarUser';
-
-
 
 // ----------------------------------------------------------------------
 
@@ -105,6 +103,7 @@ export default function UserPage() {
   const handleCloseMenu = () => {
     setOpen(null);
   };
+  
   const handleOpenEliminar = () => {
     setOpenEliminar(true);
   };
@@ -163,9 +162,7 @@ export default function UserPage() {
   //   }
   // }
   const fetchData = async () => {
-    console.log('ok')
     try {
-      // clear checkitems
       setCheckedItems({
         nombres: '',
         correo: '',
@@ -174,6 +171,8 @@ export default function UserPage() {
       setFilterName('');
       const response = await ConsultaUsuarios();
       setDatosUser(response.data.row);
+      const response2 = await ConsultarCanal();
+      console.log(response2)
     } catch (error) {
       console.error(error);
     }
@@ -185,7 +184,6 @@ const handleFiltrar = async () => {
     if (response.success === true) {
       console.log(response);
       setDatosUser(response.data.row);
-      
     } else {
       toast.error(`${response.message}`
         , {
@@ -194,8 +192,6 @@ const handleFiltrar = async () => {
 
         });
     }
-
-    
   } catch (error) {
     console.error(error);
   }
@@ -231,7 +227,6 @@ const handleEliminar = async () => {
 const handleRefresh = async () => {
   await fetchData();
 };
-
 
 const handleCheckboxChange = (event) => {
   if (event.target.checked) {
@@ -304,16 +299,14 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
             </Select>
           </FormControl>
           
-
           <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
 
-
           <Button style={{ margin : '0 0 0 1rem' }}
-          variant="contained"  onClick={handleFiltrar} disabled={isButtonDisabled}>
+            variant="contained"  onClick={handleFiltrar} disabled={isButtonDisabled}>
             Filtrar
           </Button>
           <Button style={{ margin : '0 0 0 1rem' }}
-          variant="contained"  onClick={fetchData}>
+            variant="contained"  onClick={fetchData}>
             Limpiar
           </Button>
           
@@ -472,6 +465,7 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
         </Box>
         
       </Modal>
+
       <Modal
         open={openEliminar}
         onClose={handleCloseEliminar}

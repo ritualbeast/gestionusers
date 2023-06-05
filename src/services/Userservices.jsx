@@ -8,7 +8,7 @@ const LoginToken = async (usuario, contrasenia) => {
       }
     };
     
-    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Basic ${base64.encode(`${usuario}:${contrasenia}`)}`;
     const headers = {
       'Content-Type': 'application/json',
@@ -23,6 +23,7 @@ const LoginToken = async (usuario, contrasenia) => {
     const data = await response.json();
    
     // Guardar los valores en el localStorage
+    console.log(data)
     localStorage.setItem('token', data.data.token);
     localStorage.setItem('data', data.data.idUsuario);
     
@@ -44,7 +45,7 @@ const ValidarToken = async (info) => {
     const tokenUsuario = localStorage.getItem('token');
     console.log(tokenUsuario);
 
-    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
       'Content-Type': 'application/json',
@@ -79,11 +80,9 @@ const ValidarToken = async (info) => {
 const ConsultaUsuarios = async (filterName='A', checkedItems='N') => {
   
   try {
-
     const tokenUsuario = localStorage.getItem('token');
    
-   
-    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
       'Content-Type': 'application/json',
@@ -94,8 +93,7 @@ const ConsultaUsuarios = async (filterName='A', checkedItems='N') => {
       method: 'GET',
       headers,
     };
-    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/consultaUsuarios/${checkedItems}/${filterName}/?pagina=1&size=100`, requestOptions);
-
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/consultarUsuarios/${checkedItems}/${filterName}/?pagina=1&size=100`, requestOptions);
     const data = await response.json();
     
     return data; // Devolver los datos obtenidos
@@ -110,7 +108,7 @@ const CrearUsuario = async (datosUsuario) => {
   console.log(datosUsuario);
   try {
     const tokenUsuario = localStorage.getItem('token');
-    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
       'Accept': 'application/json',
@@ -151,7 +149,7 @@ const CrearUsuario = async (datosUsuario) => {
 const EliminarUsuario = async (userId) => {
   try {
     const tokenUsuario = localStorage.getItem('token');
-    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
       'Content-Type': 'application/json',
@@ -174,7 +172,7 @@ const EliminarUsuario = async (userId) => {
 const ObtenerUsuarioPorId = async (userId) => {
   try {
     const tokenUsuario = localStorage.getItem('token');
-    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
       'Accept': 'application/json',
@@ -186,11 +184,10 @@ const ObtenerUsuarioPorId = async (userId) => {
       method: 'GET',
       headers,
     };
-    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/ObtenerUsuarioPorId/${userId}`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/obtenerUsuarioPorId/${userId}`, requestOptions);
     const data = await response.json();
     console.log(data);
     
-
     return data; // Devolver los datos obtenidos
 
   } catch (error) {
@@ -202,7 +199,7 @@ const ObtenerUsuarioPorId = async (userId) => {
 const ActualizarUsuario = async (userId, userData) => {
   try {
     const tokenUsuario = localStorage.getItem('token');
-    const canales = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8';
+    const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
       'Accept': 'application/json',
@@ -211,11 +208,35 @@ const ActualizarUsuario = async (userId, userData) => {
       'Canal': canales
     };
     const requestOptions = {
-      method: 'POST',
+      method: 'PUT',
       headers,
       body: JSON.stringify(userData)
     };
-    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/actualizar/${userId}`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/actualizarUsuario/${userId}`, requestOptions);
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+const ConsultarCanal = async () => {
+  try {
+    const tokenUsuario = localStorage.getItem('token');
+    const canal = '5b538d10-fcb3-11ed-be56-0242ac120002';
+    const token = `Bearer ${tokenUsuario}`;
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+      Canal: canal
+    };
+    const requestOptions = {
+      method: 'GET',
+      headers,
+    };
+    const url = 'http://desa.goitsa.me:8988/goit-security-api/v2/canal/consultarCanales';
+    const response = await fetch(url, requestOptions);
     const data = await response.json();
     console.log(data);
     return data;
@@ -225,11 +246,8 @@ const ActualizarUsuario = async (userId, userData) => {
   }
 };
 
-
-
-
   export {
-     LoginToken, ConsultaUsuarios, ValidarToken, CrearUsuario, EliminarUsuario, ObtenerUsuarioPorId, ActualizarUsuario
+     LoginToken, ConsultaUsuarios, ValidarToken, CrearUsuario, EliminarUsuario, ObtenerUsuarioPorId, ActualizarUsuario, ConsultarCanal
     
   }
   

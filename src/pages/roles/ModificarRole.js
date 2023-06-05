@@ -4,15 +4,18 @@ import '../../styles/createRole.css';
 import { toast } from 'react-toastify';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import Select from 'react-select';
-import { ConsultarPermisos, CrearRol, ConsultarCanal } from '../../services/ServicesRol';
+import { ConsultarPermisos, ConsultarRolPorId, ActualizarRolesConPermisos, ConsultarCanal } from '../../services/ServicesRol';
 
-const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
+const ModificarRole = (props) => {
+  
+  const {handleCloseModificar, handleRefresh, roleId}= props;
   // const { , handleRefresh } = props;
   const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [datosRecibidosporId, setDatosRecibidosporId] = useState([]);
   const [permisos, setPermisos] = useState([]);
   const [consultaCanal, setConsultaCanal] = useState([]);
   const [error, setError] = useState("");
-  const [userIdPermiso, setUserIdPermiso] = useState(userId);
+  const [userIdPermiso, setUserIdPermiso] = useState(roleId);
   const [camposIncompletos, setCamposIncompletos] = useState([]);
   const [formState, setFormState] = useState({
     nombre : '',
@@ -20,41 +23,38 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
     mnemonico : '',
     estado : '',
     usuarioCreacion : localStorage.getItem('nombreUsuario'),
-    listPermisos : [],
-    idCanal: ''
+    listPermisos : []
   });
   const [canales, setCanales] = useState([]);
-  const [permisosCanal, setPermisosCanal] = useState([]);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormState((prevState) => ({
-      ...prevState,
-      [name]: value,
-      listPermisos: [], // Reinicia los permisos cuando cambia la opción del canal
-      idCanal: value // Conserva el valor de idCanal
-    }));
-    mostrarPermisos(value); // Actualiza los permisos según la opción seleccionada
-    console.log('Canal seleccionado:', value);
-  };  
+  const handleChange = (e) => {
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+  };
 
   const handleChangePermisos = (selectedOptions) => {
     const selectedPermisos = selectedOptions.map((option) => ({
+      value: option.value,
+      label: option.label,
       idPermiso: option.idPermiso,
-      nombre: option.value,
       estado: option.estado
     }));
-    setFormState((prevState) => ({
-      ...prevState,
-      listPermisos: selectedPermisos
-    }));
-    console.log('Permisos seleccionados:', selectedPermisos);
+    setFormState((prevState) => ({ ...prevState, listPermisos: selectedPermisos }));
+  };
+  
+  const sendData = async () => {
+    try {
+      const response = await ActualizarRolesConPermisos(roleId, formState);
+      console.log(response.success);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await CrearRol(formState);
+      const response = await ActualizarRolesConPermisos(roleId, formState);
+      console.log(response.success);
       if (response.success === true) {
         toast.success(`${response.message}`, {
           position: "top-right",
@@ -80,7 +80,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
         // Cerrar el modal después de enviar el formulario
           setTimeout(() => {
           handleRefresh();
-          handleCloseModal(false)
+          handleCloseModificar(false)
         }, 1500);
       } else {
         let errorMessage = 'Error al crear el usuario';
@@ -114,49 +114,70 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
   };
 
   useEffect(() => {
-    consultaPermisos();
-    obtenerPermisos();
+    fetchData();
     consultarCanales();
+    obtenerPermisos();
+    consultaPermisos();
+    
   }, []);
 
-  useEffect(() => {
-    mostrarPermisos(formState.idCanal);
-  }, [formState.idCanal]);  
+  const [primerPermiso, setPrimerPermiso] = ([]);
 
   const obtenerPermisos = async () => {
     try {
       const data = await ConsultarPermisos(userIdPermiso);
       setPermisos(data.data.listPermisos);
+      console.log(data.data.listPermisos);
+      console.log(data.data.listPermisos[0].idCanal);
+     // setPrimerPermiso= permisos[0];
+      
     } catch (error) {
       console.error(error);
     }
   };
-
-  const consultaPermisos = async (idCanal) => {
-    try {
-      const response = await ConsultarPermisos(idCanal);
-      const permisos = response.data.listPermisos;
-      setPermisosCanal(permisos);
-    } catch (error) {
-      console.error('Error al consultar los permisos:', error);
-    }
-  };  
-
-  const consultarCanales = async () => {
-    try {
-      const response = await ConsultarCanal();
-      const canales = response.data.row;
-      setCanales(canales);
+  
+  const consultaPermisos = async () => {
+    try{
+      const response = await ConsultarPermisos();
+      console.log(response.data.listPermisos)
+      const canales = response.data.listPermisos
+      setConsultaCanal(canales);
+      
     } catch (error) {
       console.error('Error al consultar los canales:', error);
     }
-  };
+  }
 
-  const mostrarPermisos = async (opcion) => {
-    const canalSeleccionado = canales.find((canal) => canal.idCanal === opcion);
-    if (canalSeleccionado) {
-      const idCanal = canalSeleccionado.idCanal;
-      await consultaPermisos(idCanal);
+  const consultarCanales = async () => {
+    try{
+      const response = await ConsultarCanal();
+      console.log(response.data.row)
+      const canales = response.data.row
+      setCanales(canales);
+
+    }
+    catch (error) {
+      console.error('Error al consultar los canales:', error);
+    }
+  }
+
+  const fetchData = async () => {
+    try {
+      const response = await ConsultarRolPorId(userIdPermiso);
+      const data = await response;
+      setDatosRecibidosporId(response);
+      
+      setFormState({
+        nombre: data.data.nombre,
+        descripcion: data.data.descripcion,
+        mnemonico: data.data.mnemonico,
+        estado: data.data.estado,
+        usuarioCreacion: localStorage.getItem('nombreUsuario'),
+        listPermisos: data.data.listPermisos
+      });
+  
+    } catch (error) {
+      console.error(error);
     }
   };  
 
@@ -166,7 +187,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
     <Container>
       <Row className="justify-content-center">
         <Col md={6}>
-          <h2>Crear nuevo Rol</h2>
+          <h2>Editar Rol</h2>
           {showErrorMessage && (
             <div className="error-message">Todos los campos son obligatorios</div>
           )}
@@ -178,6 +199,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 type="text"
                 name="nombre"
+                value={formState.nombre}
                 placeholder="Nombre del rol"
                 onChange={handleChange}
                 required
@@ -191,6 +213,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 as="textarea"
                 name="descripcion"
+                value={formState.descripcion}
                 placeholder="Descripción del rol"
                 onChange={handleChange}
                 required
@@ -204,6 +227,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 as="textarea"
                 name="mnemonico"
+                value={formState.mnemonico}
                 placeholder="Nombre del rol"
                 onChange={handleChange}
                 required
@@ -217,6 +241,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 as="select"
                 name="estado"
+                value={formState.estado}
                 onChange={handleChange}
                 required
               >
@@ -228,30 +253,27 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
 
             <Form.Group controlId="canal">
               <Form.Label>
-                Canal <span className="error-message">*</span>
+                Canal {formState.canal === '--selecione--' && <span className="error-message">*</span>}
               </Form.Label>
               <Form.Control
                 as="select"
-                name="canal"
-                onChange={handleChange}
+                name="idEmpresa"
+                onChange={handleChange} // Asegúrate de tener una función handleChange definida
                 required
-                value={formState.idCanal}
+                value={formState.idEmpresa}
               >
-                <option value="">Seleccione un canal</option>
                 {canales.map((canal) => (
-                  <option key={canal.idCanal} value={canal.idCanal}>
-                    {canal.nemonico}
-                  </option>
+                  <option key={canal.idCanal} value={canal.idCanal}>{canal.nemonico}</option> // Utiliza los datos de 'canales' para generar las opciones
                 ))}
               </Form.Control>
             </Form.Group>
 
             <Form.Group controlId="permiso">
               <Form.Label>
-                Permiso <span className="error-message">*</span>
+                Permiso {<span className="error-message">*</span>}
               </Form.Label>
               <Select
-                options={permisosCanal.map((permiso) => ({
+                options={permisos.map((permiso) => ({
                   value: permiso.nombre,
                   label: permiso.nombre,
                   idPermiso: permiso.idPermiso,
@@ -272,7 +294,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
                   className="btnblock"
 
                 >
-                  Crear
+                  Modificar Rol
                 </Button>
               </Col>
               
@@ -285,4 +307,4 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
   );
 };
 
-export default CreateRole;
+export default ModificarRole;
