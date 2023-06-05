@@ -24,6 +24,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
     tipoIdentificacion: "",
     identificacion: "",
     estado: "A",
+    area: "",
   });
 
   useEffect(() => { 
@@ -51,10 +52,16 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCamposIncompletos([]);
+    if (formState.telefonoMovil.length !== 10 || !formState.telefonoMovil.startsWith('09')
+      ) {
+      toast.error('El Telefono debe tener 10 números y comenzar con 09', {
+        autoClose: 2000}
+      );
+      return;
+    }
     
     try {
       const response = await CrearUsuario(formState);
-      console.log(response.success);
       if (response.success === true) {
         toast.success(`${response.message}`, {
           position: "top-right",
@@ -142,6 +149,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
   
   return (
     <Container >
+      <ToastContainer />
       <Row className="justify-content-center">
         <Col>
           < PersonIcon  style={{ width: 50, height: 50 }}/>
@@ -187,6 +195,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
                 placeholder='Correo Electronico'
               />
             </Form.Group>
+            
 
             <Form.Group className='formuser' controlId="phone">
               <Form.Label>Telefono  <span className="required-asterisk">*</span></Form.Label>
@@ -243,7 +252,20 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
                 ))}
               </Form.Control>
             </Form.Group>
+            <Form.Group className='formuser' controlId="area">
+              <Form.Label>Área</Form.Label>
+              <Form.Control
 
+                type="text"
+                name="area"
+                value={formState.area}
+                onChange={handleChange}
+                placeholder='Área'
+              />
+            </Form.Group>
+
+            
+            
             <Form.Group className='formuser' controlId="identificationType">
               <Form.Label>Tipo de Identificacion</Form.Label>
               <Form.Control
@@ -288,8 +310,6 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
                 <option value="I">Inactivo</option>
               </Form.Control>
             </Form.Group>
-            <br/> 
-            
             <Row className="justify-content-center">
               <Col md={4}>
                 <Button
@@ -305,7 +325,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
               
             </Row>
           </Form>
-          <ToastContainer />
+          
         </Col>
       </Row>
     </Container>

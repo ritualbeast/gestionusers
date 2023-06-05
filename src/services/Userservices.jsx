@@ -103,6 +103,7 @@ const ConsultaUsuarios = async (filterName='T', checkedItems='E') => {
 };
 
 const CrearUsuario = async (datosUsuario) => {
+  console.log(datosUsuario);
   const tokenUsuario = localStorage.getItem('token');
   const canales = process.env.REACT_APP_CANALES;
   const token = `Bearer ${tokenUsuario}`;
@@ -126,7 +127,8 @@ const CrearUsuario = async (datosUsuario) => {
     "telefonoMovil": datosUsuario.telefonoMovil,
     "estado": datosUsuario.estado,
     "tipoIdentificacion": datosUsuario.tipoIdentificacion,
-    "identificacion": datosUsuario.identificacion
+    "identificacion": datosUsuario.identificacion,
+    "area": datosUsuario.area
   };
 
   const requestOptions = {

@@ -37,6 +37,7 @@ const ModificarUser = (props) => {
     tipoIdentificacion : '',
     identificacion : '',
     estado : '',
+    area: '',
   });
 
   useEffect(() => {
@@ -234,6 +235,7 @@ const ModificarUser = (props) => {
         usuario : data.data.usuario,
         contrasenia : data.data.contrasenia,
         idEmpresa : data.data.idEmpresa,
+        area : data.data.area,
         identificacion : data.data.identificacion,
         tipoIdentificacion : data.data.tipoIdentificacion,
         estado : data.data.estado,
@@ -427,6 +429,17 @@ const ModificarUser = (props) => {
                   <option key={empresa.idEmpresa} value={empresa.idEmpresa}>{empresa.nombre}</option> // Agregar value={empresa.idEmpresa} al option
                 ))}
               </Form.Control>
+            </Form.Group>
+            <Form.Group className='formuser' controlId="area">
+              <Form.Label>Área</Form.Label>
+              <Form.Control
+
+                type="text"
+                name="area"
+                value={formState.area}
+                onChange={handleChange}
+                placeholder='Área'
+              />
             </Form.Group>
 
 
