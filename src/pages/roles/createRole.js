@@ -7,7 +7,6 @@ import Select from 'react-select';
 import { ConsultarPermisos, CrearRol, ConsultarCanal } from '../../services/ServicesRol';
 
 const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
-  // const { , handleRefresh } = props;
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [permisos, setPermisos] = useState([]);
   const [consultaCanal, setConsultaCanal] = useState([]);

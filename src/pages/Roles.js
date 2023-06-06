@@ -181,6 +181,7 @@ export default function UserPage() {
   //     window.location.href = "/login";
   //   }
   // }
+
   const fetchData = async () => {
     try {
       // clear checkitems
@@ -480,6 +481,7 @@ const handleCheckboxChange = (event) => {
             handleCloseModificar={handleCloseModificar} 
             roleId={selectedUserId}
             handleRefresh = {fetchData}
+            
           />
         </Box>
       </Modal>

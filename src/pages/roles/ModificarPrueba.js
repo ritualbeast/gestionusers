@@ -288,44 +288,45 @@ const ModificarRole = (props) => {
               </Form.Control>
             </Form.Group>
 
-            <Form.Group controlId="permiso">
-              <Form.Label>
-                Permiso {<span className="error-message">*</span>}
-              </Form.Label>
-              <Select
-                options={permisos.map((permiso) => ({
-                  value: permiso.nombre,
-                  label: permiso.nombre,
-                  idPermiso: permiso.idPermiso,
-                  estado: permiso.estado
-                }))}
-                isMulti
-                value={formState.listPermisos.map((permiso) => ({
-                  value: permiso.nombre,
-                  label: permiso.nombre,
-                  idPermiso: permiso.idPermiso,
-                  estado: permiso.estado
-                }))}
-                onChange={handleChangePermisos}
-              />
-            </Form.Group>
-
+            <Form.Group controlId="permiso" className="formuser">
+                <Form.Label>Permiso <span className="required-asterisk">*</span></Form.Label>
+                <Select
+                    options={permisos.map((permiso) => ({
+                    value: permiso.nombre,
+                    label: permiso.nombre,
+                    idPermiso: permiso.idPermiso,
+                    estado: permiso.estado
+                    }))}
+                    isMulti
+                    value={opcionesSeleccionadas}
+                    onChange={handleOptionChange}
+                    components={{
+                    MultiValueRemove: ({ innerProps, data }) => (
+                        <span id='permisoSpan'
+                        {...innerProps}
+                        onClick={() => handleOptionDelete(data)}
+                        onKeyPress={() => {}}
+                        role="button"
+                        tabIndex={0}
+                        >
+                        &times;
+                        </span>
+                    )
+                    }}
+                />
+                </Form.Group>
 
             <Row className="justify-content-center">
               <Col md={4}>
                 <Button
-
                   variant="primary"
                   type="submit"
                   className="btnblock"
-
                 >
                   Modificar Rol
                 </Button>
               </Col>
-              
             </Row>
-
           </Form>
         </Col>
       </Row>
