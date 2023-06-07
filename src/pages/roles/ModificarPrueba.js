@@ -26,10 +26,36 @@ const ModificarRole = (props) => {
     idEmpresa: ''
   });
   const [canales, setCanales] = useState([]);
+  
+  const [formStateRol, setFormStateRol] = useState([]);
+  const [formStateRolBase, setFormStateRolBase] = useState([]);
+  const [consultaRol, setConsultaRol] = useState([]);
+  const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState([]);
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    const objeTemp = [];
+
+    opcionesSeleccionadas.forEach((op)=>{
+        consultaRol.forEach((rol)=>{
+          if(op.value === rol.nombre){
+            objeTemp.push(
+              {
+                "idRol": rol.idRol ,
+                "descripcion": rol.descripcion,
+                "estado": rol.estado,
+                "usuarioCreacion": userName
+              }
+            );
+          }
+        })
+    })
+  setFormState(objeTemp);
+}, [opcionesSeleccionadas]);
+
 
   const handleChangePermisos = (selectedOptions) => {
     const selectedPermisos = selectedOptions.map((option) => ({
@@ -117,7 +143,6 @@ const ModificarRole = (props) => {
     fetchData();
     consultarCanales();
     obtenerPermisos();
-   // consultaPermisos();
   }, []);
 
   const obtenerPermisos = async () => {
@@ -133,17 +158,6 @@ const ModificarRole = (props) => {
       console.error(error);
     }
   };
-  
-  // const consultaPermisos = async () => {
-  //   try {
-  //     const response = await ConsultarPermisos(permisoCanalId); // Pasa userIdPermiso como argumento
-  //     const canales = response.data.listPermisos;
-  //     setConsultaCanal(canales);
-
-  //   } catch (error) {
-  //     console.error('Error al consultar los canales:', error);
-  //   }
-  // };
 
   const consultarCanales = async () => {
     try{
