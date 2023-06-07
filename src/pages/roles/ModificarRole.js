@@ -26,19 +26,34 @@ const ModificarRole = (props) => {
     idEmpresa: ''
   });
   const [canales, setCanales] = useState([]);
+  const [selectedPermisos, setSelectedPermisos] = useState([]);
+  const [permisosInactivos, setPermisosInactivos] = useState([]);
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
 
   const handleChangePermisos = (selectedOptions) => {
-    const selectedPermisos = selectedOptions.map((option) => ({
-      value: option.value,
-      label: option.label,
-      idPermiso: option.idPermiso,
-      estado: option.estado
+    setSelectedPermisos(selectedOptions);
+  };
+  
+  const handleGuardarPermisosInactivos = () => {
+    const permisosInactivosActualizados = selectedPermisos.map((option) => ({
+      ...option,
+      estado: 'inactivo'
     }));
-    setFormState((prevState) => ({ ...prevState, listPermisos: selectedOptions }));
+  
+    console.log('Permisos seleccionados para inactivar:', permisosInactivosActualizados);
+    
+    setPermisosInactivos((prevPermisosInactivos) => [
+      ...prevPermisosInactivos,
+      ...permisosInactivosActualizados
+    ]);
+  
+    // Aquí puedes realizar cualquier otra acción necesaria después de guardar los permisos inactivos
+  
+    // Limpiar los permisos seleccionados
+    setSelectedPermisos([]);
   };
   
   const sendData = async () => {
@@ -309,7 +324,6 @@ const ModificarRole = (props) => {
                 onChange={handleChangePermisos}
               />
             </Form.Group>
-
 
             <Row className="justify-content-center">
               <Col md={4}>

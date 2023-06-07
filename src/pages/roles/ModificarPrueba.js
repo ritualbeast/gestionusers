@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable prefer-const */
 import React, { useEffect, useState } from 'react';
 import '../../styles/createRole.css';
 import { toast } from 'react-toastify';
@@ -7,15 +8,13 @@ import Select from 'react-select';
 import { ConsultarPermisos, ConsultarRolPorId, ActualizarRolesConPermisos, ConsultarCanal } from '../../services/ServicesRol';
 
 const ModificarRole = (props) => {
-  const {handleCloseModificar, handleRefresh, roleId}= props;
+  const {handleCloseModificar, handleRefresh, roleId, userIdRol}= props;
   const [showErrorMessage, setShowErrorMessage] = useState(false);
-  const [datosRecibidosporId, setDatosRecibidosporId] = useState([]);
   const [permisos, setPermisos] = useState([]);
   const [consultaCanal, setConsultaCanal] = useState([]);
   const [error, setError] = useState("");
   const [userIdPermiso, setUserIdPermiso] = useState(roleId);
   const [camposIncompletos, setCamposIncompletos] = useState([]);
-  const [datospermisos, setDatospermisos] = useState([])
   const [formState, setFormState] = useState({
     nombre : '',
     descripcion : '',
@@ -27,7 +26,6 @@ const ModificarRole = (props) => {
   });
   const [canales, setCanales] = useState([]);
   
-  const [formStateRol, setFormStateRol] = useState([]);
   const [formStateRolBase, setFormStateRolBase] = useState([]);
   const [consultaRol, setConsultaRol] = useState([]);
   const [opcionesSeleccionadas, setOpcionesSeleccionadas] = useState([]);
@@ -36,6 +34,7 @@ const ModificarRole = (props) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
 
+  //-----------------
   useEffect(() => {
     const objeTemp = [];
 
@@ -44,17 +43,18 @@ const ModificarRole = (props) => {
           if(op.value === rol.nombre){
             objeTemp.push(
               {
-                "idRol": rol.idRol ,
-                "descripcion": rol.descripcion,
-                "estado": rol.estado,
-                "usuarioCreacion": userName
+                "idPermiso": rol.idPermiso,
+                "idCanal": rol.idCanal,
+                "nombre": rol.nombre,
+                "estado": rol.estado
               }
             );
           }
         })
     })
-  setFormState(objeTemp);
-}, [opcionesSeleccionadas]);
+    setFormState(objeTemp);
+  }, [opcionesSeleccionadas]);
+  //-----------------
 
 
   const handleChangePermisos = (selectedOptions) => {
@@ -67,6 +67,8 @@ const ModificarRole = (props) => {
     setFormState((prevState) => ({ ...prevState, listPermisos: selectedOptions }));
   };
   
+
+  //-----------------
   const sendData = async () => {
     try {
       const response = await ActualizarRolesConPermisos(roleId, formState);
@@ -75,69 +77,138 @@ const ModificarRole = (props) => {
       console.error(error);
     }
   };
+  //-----------------
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await ActualizarRolesConPermisos(roleId, formState);
+      const response = await ActualizarRolesConPermisos(roleId, formState, objSend);
       console.log(response.success);
+      // if (response.success === true) {
+      //   toast.success(`${response.message}`, {
+      //     position: "top-right",
+      //     autoClose: 2000,
+      //     hideProgressBar: true,
+      //     closeOnClick: true,
+      //     pauseOnHover: true,
+      //     draggable: true,
+      //     progress: undefined,
+      //     theme: "light",
+      //     style: {
+      //       fontSize: '11px' // Tamaño de letra deseado
+      //     }
+      //   });
+      //   setFormState({
+      //     nombre : '',
+      //     descripcion : '',
+      //     mnemonico : '',
+      //     estado : '',
+      //     usuarioCreacion : '',
+      //     listPermisos : []
+      //   });
+      //   // Cerrar el modal después de enviar el formulario
+      //     setTimeout(() => {
+      //     handleRefresh();
+      //     handleCloseModificar(false)
+      //   }, 1500);
+      // } else {
+      //   let errorMessage = 'Error al crear el usuario';
+      //   if (response.code === 400) {
+      //     errorMessage = 'Ha ocurrido un error en la solicitud';
+      //     setCamposIncompletos(errorMessage);
+      //   } else if (response.code === 500) {
+      //     errorMessage = 'Ha ocurrido un error en el servidor';
+      //   } else if (response.code === 401) {
+      //     errorMessage = 'No estás autorizado para realizar esta acción';
+      //   }
+      //   setError(errorMessage);
+      //   toast.error(errorMessage, {
+      //     position: "top-right",
+      //     autoClose: 2000,
+      //     hideProgressBar: true,
+      //     closeOnClick: true,
+      //     pauseOnHover: true,
+      //     draggable: true,
+      //     progress: undefined,
+      //     theme: "light",
+      //     style: {
+      //       fontSize: '11px' // Tamaño de letra deseado
+      //     }
+      //   });
+      // }
+
       if (response.success === true) {
         toast.success(`${response.message}`, {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          style: {
-            fontSize: '11px' // Tamaño de letra deseado
-          }
-        });
-        setFormState({
-          nombre : '',
-          descripcion : '',
-          mnemonico : '',
-          estado : '',
-          usuarioCreacion : '',
-          listPermisos : []
+          // Configuración del toast
         });
         // Cerrar el modal después de enviar el formulario
-          setTimeout(() => {
+        setTimeout(() => {
           handleRefresh();
           handleCloseModificar(false)
         }, 1500);
       } else {
+        // Manejo de errores de respuesta
         let errorMessage = 'Error al crear el usuario';
         if (response.code === 400) {
-          errorMessage = 'Ha ocurrido un error en la solicitud';
+          errorMessage = response.message;
           setCamposIncompletos(errorMessage);
         } else if (response.code === 500) {
-          errorMessage = 'Ha ocurrido un error en el servidor';
+          errorMessage = response.message;
         } else if (response.code === 401) {
-          errorMessage = 'No estás autorizado para realizar esta acción';
+          errorMessage = response.message;
+        } else {
+          errorMessage = 'Ha ocurrido un error inesperado';
         }
         setError(errorMessage);
         toast.error(errorMessage, {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          style: {
-            fontSize: '11px' // Tamaño de letra deseado
-          }
+          // Configuración del toast
         });
       }
+    
+      // Actualizar el rol existente
+      console.log('roles del usuario:', formState);
+
+      let objSendI = [];
+      formStateRolBase.forEach(element => {
+        let validate=false;
+        formState.forEach(el => {
+          if (element.idRol === el.idRol) { 
+            console.log('element.idRol', element.idRol);
+            console.log('el.idRol', el.idRol);         
+
+            validate=true
+          }   
+        });
+        console.log(validate);
+        if (validate === false) console.log('inactiva:', element.idRol)
+        if (!validate) element.estado = 'I';
+        if (!validate) objSendI.push(element);
+      });
+
+      console.log(formStateRolBase)
+      console.log(formState)
+      console.log(objSendI)
+
+
+      let objSend = [];
+
+      if (objSendI.length !== 0) {
+        objSend = formState;
+        objSendI.forEach((data) =>{
+          objSend.push(data);
+        })
+      }else{
+        objSend = formState
+      }
+      console.log('objSend', objSend)
+
     } catch (error) {
       console.error(error);
       setError('Error al enviar el formulario');
     }
   };
+
 
   useEffect(() => {
     fetchData();
@@ -145,19 +216,23 @@ const ModificarRole = (props) => {
     obtenerPermisos();
   }, []);
 
+
+  //-----------------
   const obtenerPermisos = async () => {
     try {
       const idCanales = await recibirIdEmpresa()
       console.log(idCanales)
       const data = await ConsultarPermisos(idCanales);
+
       const permisos = data.data.listPermisos;
       console.log(data)
       setPermisos(permisos);
-
     } catch (error) {
       console.error(error);
     }
   };
+  //-----------------
+
 
   const consultarCanales = async () => {
     try{
@@ -171,27 +246,56 @@ const ModificarRole = (props) => {
     }
   }
 
+  //-----------------
   const fetchData = async () => {
     try {
       const response = await ConsultarRolPorId(userIdPermiso);
-      const data = response.data;
-      console.log(data)
+      // const data = response.data;
+      // console.log(data)
   
-      setDatosRecibidosporId(response);
-      setFormState({
-        nombre: data.nombre,
-        descripcion: data.descripcion,
-        mnemonico: data.mnemonico,
-        estado: data.estado,
-        usuarioCreacion: data.usuarioCreacion,
-        listPermisos: data.listPermisos,
-        idEmpresa: data.listPermisos[0].idCanal
-      });
-      setDatospermisos(data.listPermisos)
+      // setDatosRecibidosporId(response);
+      // setFormState({
+      //   nombre: data.nombre,
+      //   descripcion: data.descripcion,
+      //   mnemonico: data.mnemonico,
+      //   estado: data.estado,
+      //   usuarioCreacion: data.usuarioCreacion,
+      //   listPermisos: data.listPermisos,
+      //   idEmpresa: data.listPermisos[0].idCanal
+      // });
+      // setDatospermisos(data.listPermisos)
+
+      const roles = response.data.listRoles;
+      setOpcionesSeleccionadas(roles.map((rol) => ({ 
+        nombre : rol.nombre,
+        descripcion : rol.descripcion,
+        mnemonico : rol.mnemonico,
+        estado : rol.estado,
+        usuarioCreacion : localStorage.getItem('nombreUsuario'),
+        listPermisos : [],
+        idEmpresa: rol.idEmpresa
+      })));
+
+      const objeTemp = [];
+
+      roles.forEach((rol)=>{
+          objeTemp.push(
+            {
+              "idPermiso": rol.idPermiso,
+              "idCanal": rol.idCanal,
+              "nombre": rol.nombre,
+              "estado": rol.estado
+            }
+          );
+
+      })
+      setFormStateRolBase(objeTemp)
     } catch (error) {
       console.error(error);
     }
   };
+  //-----------------
+
 
   const recibirIdEmpresa = () => {
     return new Promise((resolve) => {
@@ -208,7 +312,25 @@ const ModificarRole = (props) => {
     });
   };
   
+
   const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
+
+
+  //-----------------
+  const opcionesRol = consultaRol.map((rol) => ({ value: rol.nombre, label: rol.nombre }));
+
+  const handleOptionChange = (selectedOptions) => {
+    setOpcionesSeleccionadas(selectedOptions);
+
+    console.log('ejecuta: ', selectedOptions)
+  };
+  
+  const handleOptionDelete = (removedOption) => {
+    const updatedOptions = opcionesSeleccionadas.filter(option => option !== removedOption);
+    setOpcionesSeleccionadas(updatedOptions);
+  };
+  //-----------------
+
 
   const test = () => {
     console.log(formState.idEmpresa);
