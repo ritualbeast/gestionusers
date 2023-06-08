@@ -14,6 +14,10 @@ import {
   Checkbox,
   Modal,
   TableBody,
+  Radio, 
+  RadioGroup,
+  FormLabel,
+  FormControlLabel,
   TableCell,
   Container,
   Typography,
@@ -103,11 +107,9 @@ export default function UserPage() {
   const [isSelectUsed, setIsSelectUsed] = useState(false);
   const [isToolbarUsed, setIsToolbarUsed] = useState(false); // Cambiar el orden
   const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
-  const [valorcheck, setValorcheck] = useState([]);
   const [valorcheck2, setValorcheck2] = useState('N');
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [datosRole, setDatosRole] = useState([]);
-
+  const [isNotFound, setIsNotFound] = useState(false);
   const [checkedItems, setCheckedItems] = useState({
     nombre: '',
     descripcion: '',
@@ -131,25 +133,6 @@ export default function UserPage() {
     setOpenEliminar(false);
   };
 
-  const filteredUsers = applySortFilter(datosUser, getComparator(order, orderBy), filterName);
-  const isNotFound = !filteredUsers.length && !!filterName;
-
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
-
-  const handleOpenModificar = () => {
-    setOpenModificar(true);
-  };
-
-  const handleCloseModificar = () => {
-    setOpenModificar(false);
-  };
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -169,18 +152,30 @@ export default function UserPage() {
     }
   };
 
+  const filteredUsers = applySortFilter(datosUser, getComparator(order, orderBy), filterName);
+  // const isNotFound = !filteredUsers.length && !!filterName;
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleOpenModificar = () => {
+    setOpenModificar(true);
+  };
+
+  const handleCloseModificar = () => {
+    setOpenModificar(false);
+  };
+
   useEffect(() => {
     // verificarLocalStorage();
     fetchData();
 
   }, []);
-  
-  // const verificarLocalStorage = () => {
-  //   const isAdmin = localStorage.getItem("nombreUsuario");
-  //   if (isAdmin === null) {
-  //     window.location.href = "/login";
-  //   }
-  // }
 
   const fetchData = async () => {
     try {
@@ -246,33 +241,46 @@ const handleEliminar = async () => {
   }
 };
 
-const handleRefresh = async () => {
-  await fetchData();
-};
-
-const handleCheckboxChange = (event) => {
-  if (event.target.checked) {
-    setIsSelectUsed(true);
-  }
-  else {
-    setIsSelectUsed(false);
-  }
-
-  const { name, checked } = event.target;
-  if (checked) {
-    setCheckedItems({ ...checkedItems, [name]: true });
-    setValorcheck2(event.target.value);
-  } else {
-    const { [name]: _, ...updatedCheckedItems } = checkedItems;
-    setCheckedItems(updatedCheckedItems);
-  }
-  const selectedValues = Object.keys(checkedItems).filter((item) => checkedItems[item]);
-  setValorcheck(selectedValues);
-  
-  
-};
   const paginatedData = filteredUsers.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
   
+  const [selectedOption, setSelectedOption] = useState('');
+  const options = [
+    { value: 'No', label: 'Nombres' },
+    { value: 'De', label: 'Descripción' },
+    { value: 'E', label: 'Estado' },
+  ];
+
+  const getOptionLabel = (value) => {
+    const option = options.find((opt) => opt.value === value);
+    return option ? option.label : '';
+  };
+  const [selectedEstado, setSelectedEstado] = useState('');
+  const [showEstadoOptions, setShowEstadoOptions] = useState(false);
+  const handleOptionChange = (event) => {
+    const { value } = event.target;
+    setSelectedOption(value);
+    setIsSelectUsed(true);
+    const option = event.target.value;
+      setSelectedOption(option);
+
+      if (option === 'E') {
+        setShowEstadoOptions(true);
+        setIsToolbarUsed(true);
+
+      } else if (option !== 'E') 
+      {
+        setShowEstadoOptions(false);
+        setIsToolbarUsed(false);
+      }
+  };
+
+  const handleEstadoChange = (event) => {
+    const { value } = event.target;
+    setSelectedEstado(value);
+    setIsSelectUsed(true);
+    console.log(value);
+    setFilterName(value);
+  };
 
   return (
     <>
@@ -293,97 +301,122 @@ const handleCheckboxChange = (event) => {
           </Stack>
 
           <Card>
-              <div style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
-              
-              <FormControl variant="outlined"  style={{ width: '20%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
+              <FormControl variant="outlined" style={{ width: '20%' }}>
                 <InputLabel id="select-label">Filtrar por</InputLabel>
                 <Select
                   labelId="select-label"
-                  multiple = {false}
-                  value={Object.keys(checkedItems).filter((item) => checkedItems[item])}
-                  onChange={handleCheckboxChange}
-                  renderValue={(selected) => selected.join(', ')}
+                  value={selectedOption}
+                  onChange={handleOptionChange}
+                  label="Filtrar por"
+                  renderValue={(selected) => getOptionLabel(selected) || 'Seleccionar'}
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+                    getContentAnchorEl: null,
+                  }}
                 >
-                  <MenuItem >
-                    <Checkbox checked={checkedItems.nombre} onChange={handleCheckboxChange} name="nombre" value='No' />
-                    <InputLabel>Nombre</InputLabel>
-                  </MenuItem>
-                  <MenuItem >
-                    <Checkbox checked={checkedItems.descripcion} onChange={handleCheckboxChange} name="descripcion" value='De' />
-                    <InputLabel>Descripción</InputLabel>
-                  </MenuItem>
-                  <MenuItem >
-                    <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" value='E' />
-                    <InputLabel>Estado</InputLabel>
-                  </MenuItem>
+                  {options.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-              
-              <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
 
-              <Button style={{ margin : '0 0 0 1rem' }}
-                variant="contained"  onClick={handleFiltrar} disabled={isButtonDisabled}>
+            {selectedOption === 'E' && (
+              <>
+                <FormControl component="fieldset" style={{ marginLeft: '1rem' }}>
+                  <FormLabel component="legend">Estado</FormLabel>
+                  <RadioGroup
+                    aria-label="estado"
+                    name="estado"
+                    value={selectedEstado}
+                    onChange={handleEstadoChange}
+                    style={{ flexDirection: 'row' }}
+                  >
+                    <FormControlLabel
+                      value="A"
+                      control={<Radio />}
+                      label="Activo"
+                    />
+                    <FormControlLabel
+                      value="I"
+                      control={<Radio />}
+                      label="Inactivo"
+                    />
+                  </RadioGroup>
+                </FormControl>
+              </>
+            )}
+            {!showEstadoOptions && (
+              <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+            )          
+            }
+              
+              <Button style={{ margin: '0 0 0 1rem' }} variant="contained" onClick={handleFiltrar} disabled={isButtonDisabled}>
                 Filtrar
               </Button>
-              <Button style={{ margin : '0 0 0 1rem' }}
-                variant="contained"  onClick={fetchData}>
+              <Button style={{ margin: '0 0 0 1rem' }} variant="contained" onClick={fetchData}>
                 Limpiar
               </Button>
-              
-              </div>
+            </div>
 
               <Scrollbar>
-                  <TableContainer sx={{ minWidth: 800 }}>
-                      <Table>
-                          <UserListHead
-                            headLabel={TABLE_HEAD}
-                          />
-                          <TableBody>
-                          
-                            {Array.isArray(paginatedData) && paginatedData.map((user, index) => (
-                              
-                              <TableRow key={user.idRol}>
-                                <TableCell> 
-                                  {index + 1}
-                                </TableCell>
-                                <TableCell>{user.nombre}</TableCell>
-                                <TableCell>{user.descripcion}</TableCell>
-                                <TableCell>{user.nemonico}</TableCell>
-                                <TableCell>{user.estado}</TableCell>
-                                <TableCell align="center">
-                                  <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idRol)}>
-                                    <Iconify icon={'eva:more-vertical-fill'} />
-                                  </IconButton>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                          {isNotFound && (
-                          <TableBody>
-                            <TableRow>
-                              <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                                <Paper
-                                  sx={{
-                                    textAlign: 'center',
-                                  }}
-                                >
-                                  <Typography variant="h6" paragraph>
-                                    Sin resultados
-                                  </Typography>
+                <TableContainer sx={{ minWidth: 800 }}>
+                <Table>
+                  <UserListHead headLabel={TABLE_HEAD} />
+                  
+                  {isNotFound ? (
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                          <Paper
+                            sx={{
+                              textAlign: 'center',
+                            }}
+                          >
+                            <Typography variant="h6" paragraph>
+                              Sin resultados
+                            </Typography>
+                            <Typography variant="body2">
+                              No existen resultados para  &nbsp;
+                              <strong>&quot;{filterName}&quot;</strong>.
+                              <br /> Intenta verificar errores tipográficos o buscar por otra palabra.
+                            </Typography>
+                          </Paper>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {Array.isArray(paginatedData) && paginatedData.map((user, index) => (
+                        <TableRow key={user.idUsuario}>
+                          <TableCell>{index + 1}</TableCell>
+                          <TableCell>{user.nombre}</TableCell>
+                          <TableCell>{user.descripcion}</TableCell>
+                          <TableCell>{user.nemonico}</TableCell>
+                          <TableCell>{user.estado}</TableCell>
+                          <TableCell align="center">
+                            <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idUsuario)}>
+                              <Iconify icon={'eva:more-vertical-fill'} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  )}
+                </Table>
 
-                                  <Typography variant="body2">
-                                    No existen resultados para  &nbsp;
-                                    <strong>&quot;{filterName}&quot;</strong>.
-                                    <br /> Intenta verificar errores tipográficos o buscar por otra palabra.
-                                  </Typography>
-                                </Paper>
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        )}
-                      </Table>
-                  </TableContainer>
+                </TableContainer>
               </Scrollbar>
+              
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
@@ -393,7 +426,7 @@ const handleCheckboxChange = (event) => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
-          </Card>
+            </Card>
       </Container>
 
       <Menu

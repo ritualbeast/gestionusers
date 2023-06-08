@@ -26,7 +26,6 @@ const ConsultarRoles = async (filterName='A', checkedItems='E') => {
 };
 
 const ConsultarPermisos = async (canalxDefecto) => {
-  console.log(canalxDefecto)
   try {
     const tokenUsuario = localStorage.getItem('token');
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
@@ -42,7 +41,6 @@ const ConsultarPermisos = async (canalxDefecto) => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/permisos/consultarPermisosPorIdCanal/${canalxDefecto}`, requestOptions);
     const data = await response.json();
-    console.log(response)
     return data; // Devolver los datos obtenidos
   } catch (error) {
     console.error(error);
@@ -140,7 +138,7 @@ const ActualizarRolesConPermisos = async (rolId, userData) => {
   }
 };
 
-const EliminarRol= async (rolId) => {
+const EliminarRol= async (roleId) => {
   try {
     const tokenUsuario = localStorage.getItem('token');
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
@@ -154,7 +152,7 @@ const EliminarRol= async (rolId) => {
       method: 'DELETE',
       headers,
     };
-    const response = await fetch(`http://localhost:8988/goit-security-api/v2/roles/eliminarRol/${rolId}`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/eliminarRol/${roleId}`, requestOptions);
     const data = await response.json();
     return data;
   } catch (error) {

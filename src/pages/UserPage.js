@@ -1,13 +1,15 @@
 
 import { Helmet } from 'react-helmet-async';
 import { filter, set } from 'lodash';
-import {  useState, useEffect, useContext } from 'react';
+import {  useState, useEffect } from 'react';
 
 // @mui
 import {Card,Table,  Stack,  Paper, Avatar,  Button, InputLabel,
   Popover,  Checkbox,  TableRow,  MenuItem,
   Modal,  TableBody,  TableCell,  Container,
-  Typography,  IconButton, TableContainer, TablePagination, Box, Menu, Select, FormControl, FormControlLabel, FormGroup
+  Typography,  IconButton, TableContainer, TablePagination, Box, 
+  Menu, Select, FormControl, FormControlLabel, FormGroup, 
+  FormLabel, Radio, RadioGroup
 } from '@mui/material';
 
 import { toast, ToastContainer } from 'react-toastify';
@@ -19,11 +21,13 @@ import Scrollbar from '../components/scrollbar';
 // sections
 import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 
-import { ConsultaUsuarios, ValidarToken, EliminarUsuario, ConsultarCanal } from '../services/Userservices';
+import { ConsultaUsuarios, ValidarToken, EliminarUsuario, ObtenerUsuarioPorId } from '../services/Userservices';
 // mock
 import USERLIST from '../_mock/user';
 import CreateUser from './userPages/createUser';
 import ModificarUser from './userPages/ModificarUser';
+
+
 
 // ----------------------------------------------------------------------
 
@@ -89,6 +93,7 @@ export default function UserPage() {
   const [valorcheck, setValorcheck] = useState([]);
   const [valorcheck2, setValorcheck2] = useState('N');
   const [idUsuario, setIdUsuario] = useState('');
+  const [isNotFound, setIsNotFound] = useState(false);
   const [checkedItems, setCheckedItems] = useState({
     nombres: '',
     correo: '',
@@ -103,9 +108,9 @@ export default function UserPage() {
   const handleCloseMenu = () => {
     setOpen(null);
   };
-  
   const handleOpenEliminar = () => {
     setOpenEliminar(true);
+    handleCloseMenu();
   };
 
   const handleCloseEliminar = () => {
@@ -132,7 +137,7 @@ export default function UserPage() {
 
   const filteredUsers = applySortFilter(datosUser, getComparator(order, orderBy), filterName);
 
-  const isNotFound = !filteredUsers.length && !!filterName;
+  // const isNotFound = !filteredUsers.length && !!filterName;
 
   const handleOpenModal = (opcion) => {
     setOpenModal(opcion);
@@ -143,6 +148,7 @@ export default function UserPage() {
   };
   const handleOpenModificar = () => {
     setOpenModificar(true);
+    handleCloseMenu();
   };
 
   const handleCloseModificar = () => {
@@ -163,16 +169,12 @@ export default function UserPage() {
   // }
   const fetchData = async () => {
     try {
-      setCheckedItems({
-        nombres: '',
-        correo: '',
-        estado: '',
-      });
+      // clear checkitems
+      setIsSelectUsed (false);
+      setSelectedOption('');
       setFilterName('');
       const response = await ConsultaUsuarios();
       setDatosUser(response.data.row);
-      const response2 = await ConsultarCanal();
-      console.log(response2)
     } catch (error) {
       console.error(error);
     }
@@ -180,11 +182,20 @@ export default function UserPage() {
 
 const handleFiltrar = async () => {
   try {
-    const response = await ConsultaUsuarios(filterName, valorcheck2);
-    if (response.success === true) {
+    const response = await ConsultaUsuarios(filterName, selectedOption);
+    if (response.data.row.length === 0) {
+      toast.error(`No se encontraron resultados para la busqueda: ${filterName}`, {
+        autoClose: 1500,
+      });
+      
+    } else if (response.success === true) {
       console.log(response);
       setDatosUser(response.data.row);
-    } else {
+      // setIsNotFound(false);
+      
+    }
+
+     else if (response.success === false) {
       toast.error(`${response.message}`
         , {
           position: "bottom-right",
@@ -192,6 +203,8 @@ const handleFiltrar = async () => {
 
         });
     }
+
+    
   } catch (error) {
     console.error(error);
   }
@@ -224,38 +237,56 @@ const handleEliminar = async () => {
   }
 };
 
-const handleRefresh = async () => {
-  await fetchData();
-};
-
-const handleCheckboxChange = (event) => {
-  if (event.target.checked) {
-    setIsSelectUsed(true);
-  }
-  else {
-    setIsSelectUsed(false);
-  }
-
-  const { name, checked } = event.target;
-  if (checked) {
-    setCheckedItems({ ...checkedItems, [name]: true });
-    setValorcheck2(event.target.value);
-  } else {
-    const { [name]: _, ...updatedCheckedItems } = checkedItems;
-    setCheckedItems(updatedCheckedItems);
-  }
-  const selectedValues = Object.keys(checkedItems).filter((item) => checkedItems[item]);
-  setValorcheck(selectedValues);
-  
-  
-};
 
 const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
 
-  return (
+// recibir datos del filtro
+
+const [selectedOption, setSelectedOption] = useState('');
+const options = [
+  { value: 'N', label: 'Nombres' },
+  { value: 'C', label: 'Correo' },
+  { value: 'E', label: 'Estado' },
+];
+
+const getOptionLabel = (value) => {
+  const option = options.find((opt) => opt.value === value);
+  return option ? option.label : '';
+};
+const [selectedEstado, setSelectedEstado] = useState('');
+const [showEstadoOptions, setShowEstadoOptions] = useState(false);
+const handleOptionChange = (event) => {
+  const { value } = event.target;
+  setSelectedOption(value);
+  setIsSelectUsed(true);
+  const option = event.target.value;
+    setSelectedOption(option);
+
+    if (option === 'E') {
+      setShowEstadoOptions(true);
+      setIsToolbarUsed(true);
+
+    } else if (option !== 'E') 
+    {
+      setShowEstadoOptions(false);
+      setIsToolbarUsed(false);
+    }
+};
+
+const handleEstadoChange = (event) => {
+  const { value } = event.target;
+  setSelectedEstado(value);
+  setIsSelectUsed(true);
+  console.log(value);
+  setFilterName(value);
+};
+
+
+  return (    
     <>
+      <ToastContainer />
       <Helmet>
-        <title> User | Minimal UI </title>
+        <title> User </title>
       </Helmet>
       
       <Container>
@@ -274,56 +305,104 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
 
         <Card>
         <div style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
-          
-          <FormControl variant="outlined"  style={{ width: '20%' }}>
+          <FormControl variant="outlined" style={{ width: '20%' }}>
             <InputLabel id="select-label">Filtrar por</InputLabel>
             <Select
               labelId="select-label"
-              multiple = {false}
-              value={Object.keys(checkedItems).filter((item) => checkedItems[item])}
-              onChange={handleCheckboxChange}
-              renderValue={(selected) => selected.join(', ')}
+              value={selectedOption}
+              onChange={handleOptionChange}
+              label="Filtrar por"
+              renderValue={(selected) => getOptionLabel(selected) || 'Seleccionar'}
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                },
+                transformOrigin: {
+                  vertical: 'top',
+                  horizontal: 'left',
+                },
+                getContentAnchorEl: null,
+              }}
             >
-              <MenuItem >
-                <Checkbox checked={checkedItems.nombres} onChange={handleCheckboxChange} name="nombres" value='N' />
-                <InputLabel>Nombres</InputLabel>
-              </MenuItem>
-              <MenuItem >
-                <Checkbox checked={checkedItems.correo} onChange={handleCheckboxChange} name="correo" value='C' />
-                <InputLabel>Correo</InputLabel>
-              </MenuItem>
-              <MenuItem >
-                <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" value='E' />
-                <InputLabel>Estado</InputLabel>
-              </MenuItem>
+              {options.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
-          
-          <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
 
-          <Button style={{ margin : '0 0 0 1rem' }}
-            variant="contained"  onClick={handleFiltrar} disabled={isButtonDisabled}>
+        {selectedOption === 'E' && (
+          <>
+            <FormControl component="fieldset" style={{ marginLeft: '1rem' }}>
+              <FormLabel component="legend">Estado</FormLabel>
+              <RadioGroup
+                aria-label="estado"
+                name="estado"
+                value={selectedEstado}
+                onChange={handleEstadoChange}
+                style={{ flexDirection: 'row' }}
+              >
+                <FormControlLabel
+                  value="A"
+                  control={<Radio />}
+                  label="Activo"
+                />
+                <FormControlLabel
+                  value="I"
+                  control={<Radio />}
+                  label="Inactivo"
+                />
+              </RadioGroup>
+            </FormControl>
+          </>
+        )}
+        {!showEstadoOptions && (
+          <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+        )          
+        }
+
+          
+          <Button style={{ margin: '0 0 0 1rem' }} variant="contained" onClick={handleFiltrar} disabled={isButtonDisabled}>
             Filtrar
           </Button>
-          <Button style={{ margin : '0 0 0 1rem' }}
-            variant="contained"  onClick={fetchData}>
+          <Button style={{ margin: '0 0 0 1rem' }} variant="contained" onClick={fetchData}>
             Limpiar
           </Button>
-          
         </div>
+
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
-              <Table>
-                <UserListHead
-                  headLabel={TABLE_HEAD}
-                />
-
+            <Table>
+              <UserListHead headLabel={TABLE_HEAD} />
+              
+              {isNotFound ? (
+                <TableBody>
+                  <TableRow>
+                    <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                      <Paper
+                        sx={{
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Typography variant="h6" paragraph>
+                          Sin resultados
+                        </Typography>
+                        <Typography variant="body2">
+                          No existen resultados para  &nbsp;
+                          <strong>&quot;{filterName}&quot;</strong>.
+                          <br /> Intenta verificar errores tipográficos o buscar por otra palabra.
+                        </Typography>
+                      </Paper>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              ) : (
                 <TableBody>
                   {Array.isArray(paginatedData) && paginatedData.map((user, index) => (
                     <TableRow key={user.idUsuario}>
-                      <TableCell> 
-                        {index + 1}
-                      </TableCell>
+                      <TableCell>{index + 1}</TableCell>
                       <TableCell>{user.nombres}</TableCell>
                       <TableCell>{user.apellidos}</TableCell>
                       <TableCell>{user.correo}</TableCell>
@@ -336,30 +415,9 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
                     </TableRow>
                   ))}
                 </TableBody>
-                {isNotFound && (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                        <Paper
-                          sx={{
-                            textAlign: 'center',
-                          }}
-                        >
-                          <Typography variant="h6" paragraph>
-                            Sin resultados
-                          </Typography>
+              )}
+            </Table>
 
-                          <Typography variant="body2">
-                            No existen resultados para  &nbsp;
-                            <strong>&quot;{filterName}&quot;</strong>.
-                            <br /> Intenta verificar errores tipográficos o buscar por otra palabra.
-                          </Typography>
-                        </Paper>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                )}
-              </Table>
             </TableContainer>
           </Scrollbar>
           
@@ -430,6 +488,7 @@ const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPa
         </IconButton>
             <CreateUser  
              handleCloseModal={handleCloseModal}
+             handleRefresh = {fetchData}
              />
         </Box>
       </Modal>

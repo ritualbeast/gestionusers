@@ -16,48 +16,47 @@ const ModificarRole = (props) => {
   const [userIdPermiso, setUserIdPermiso] = useState(roleId);
   const [camposIncompletos, setCamposIncompletos] = useState([]);
   const [datospermisos, setDatospermisos] = useState([])
+  const usuarioCreacion = localStorage.getItem('nombreUsuario') || ''; // Asigna un valor predeterminado en caso de que sea null o no esté definido
   const [formState, setFormState] = useState({
-    nombre : '',
-    descripcion : '',
-    mnemonico : '',
-    estado : '',
-    usuarioCreacion : localStorage.getItem('nombreUsuario'),
-    listPermisos : [],
+    nombre: '',
+    descripcion: '',
+    mnemonico: '',
+    estado: '',
+    usuarioCreacion,
+    listPermisos: [],
     idEmpresa: ''
   });
   const [canales, setCanales] = useState([]);
   const [selectedPermisos, setSelectedPermisos] = useState([]);
-  const [permisosInactivos, setPermisosInactivos] = useState([]);
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
-
+  
+  useEffect(() => {
+    setSelectedPermisos(
+      formState.listPermisos.map((permiso) => ({
+        value: permiso.nombre,
+        label: permiso.nombre,
+        idPermiso: permiso.idPermiso,
+        estado: permiso.estado,
+      }))
+    );
+  }, [formState.listPermisos]);
+  
   const handleChangePermisos = (selectedOptions) => {
     setSelectedPermisos(selectedOptions);
   };
-  
-  const handleGuardarPermisosInactivos = () => {
-    const permisosInactivosActualizados = selectedPermisos.map((option) => ({
-      ...option,
-      estado: 'inactivo'
-    }));
-  
-    console.log('Permisos seleccionados para inactivar:', permisosInactivosActualizados);
-    
-    setPermisosInactivos((prevPermisosInactivos) => [
-      ...prevPermisosInactivos,
-      ...permisosInactivosActualizados
-    ]);
-  
-    // Aquí puedes realizar cualquier otra acción necesaria después de guardar los permisos inactivos
-  
-    // Limpiar los permisos seleccionados
-    setSelectedPermisos([]);
-  };
+
+  const handleDelete = (removedOption) => {
+    const updatedOptions = selectedPermisos.filter(option => option !== removedOption);
+    setSelectedPermisos(updatedOptions);
+  }; 
   
   const sendData = async () => {
     try {
+      console.log('Datos a enviar:', formState);
+
       const response = await ActualizarRolesConPermisos(roleId, formState);
       console.log(response.success);
     } catch (error) {
@@ -138,10 +137,8 @@ const ModificarRole = (props) => {
   const obtenerPermisos = async () => {
     try {
       const idCanales = await recibirIdEmpresa()
-      console.log(idCanales)
       const data = await ConsultarPermisos(idCanales);
       const permisos = data.data.listPermisos;
-      console.log(data)
       setPermisos(permisos);
 
     } catch (error) {
@@ -176,8 +173,7 @@ const ModificarRole = (props) => {
     try {
       const response = await ConsultarRolPorId(userIdPermiso);
       const data = response.data;
-      console.log(data)
-  
+
       setDatosRecibidosporId(response);
       setFormState({
         nombre: data.nombre,
@@ -199,7 +195,6 @@ const ModificarRole = (props) => {
       ConsultarRolPorId(userIdPermiso)
         .then((response) => {
           const data = response.data;
-          console.log(data)
           resolve(data.listPermisos[0].idCanal);
         })
         .catch((error) => {
@@ -212,7 +207,7 @@ const ModificarRole = (props) => {
   const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
 
   const test = () => {
-    console.log(formState.idEmpresa);
+    console.log(formState);
   };
  
   return (
@@ -315,13 +310,9 @@ const ModificarRole = (props) => {
                   estado: permiso.estado
                 }))}
                 isMulti
-                value={formState.listPermisos.map((permiso) => ({
-                  value: permiso.nombre,
-                  label: permiso.nombre,
-                  idPermiso: permiso.idPermiso,
-                  estado: permiso.estado
-                }))}
+                value={selectedPermisos}
                 onChange={handleChangePermisos}
+                onDelete={handleDelete}
               />
             </Form.Group>
 
