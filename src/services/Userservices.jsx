@@ -77,7 +77,7 @@ const ValidarToken = async (info) => {
 
 
 
-const ConsultaUsuarios = async (filterName='A', checkedItems='N') => {
+const ConsultaUsuarios = async (filterName='T', checkedItems='E') => {
   
   try {
     const tokenUsuario = localStorage.getItem('token');

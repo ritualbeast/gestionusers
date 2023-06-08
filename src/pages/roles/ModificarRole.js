@@ -13,16 +13,16 @@ const ModificarRole = (props) => {
   const [permisos, setPermisos] = useState([]);
   const [consultaCanal, setConsultaCanal] = useState([]);
   const [error, setError] = useState("");
+  const [nombreUsuario, setNombreUsuario] = useState(localStorage.getItem('nombreUsuario'));
   const [userIdPermiso, setUserIdPermiso] = useState(roleId);
   const [camposIncompletos, setCamposIncompletos] = useState([]);
   const [datospermisos, setDatospermisos] = useState([])
-  const usuarioCreacion = localStorage.getItem('nombreUsuario') || ''; // Asigna un valor predeterminado en caso de que sea null o no esté definido
   const [formState, setFormState] = useState({
     nombre: '',
     descripcion: '',
     mnemonico: '',
     estado: '',
-    usuarioCreacion,
+    usuarioCreacion: nombreUsuario,
     listPermisos: [],
     idEmpresa: ''
   });
@@ -46,24 +46,43 @@ const ModificarRole = (props) => {
   
   const handleChangePermisos = (selectedOptions) => {
     setSelectedPermisos(selectedOptions);
+  
+    // Guardar los datos actualizados en listPermisos
+    const updatedListPermisos = selectedOptions.map(option => ({
+      nombre: option.value,
+      idPermiso: option.idPermiso,
+      estado: option.estado
+    }));
+    setFormState(prevState => ({
+      ...prevState,
+      listPermisos: updatedListPermisos
+    }));
   };
-
+  
   const handleDelete = (removedOption) => {
     const updatedOptions = selectedPermisos.filter(option => option !== removedOption);
     setSelectedPermisos(updatedOptions);
-  }; 
   
-  const sendData = async () => {
-    try {
-      console.log('Datos a enviar:', formState);
-
-      const response = await ActualizarRolesConPermisos(roleId, formState);
-      console.log(response.success);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
+    const removedPermisoId = removedOption.idPermiso;
+  
+    const updatedListPermisos = formState.listPermisos.map(permiso => {
+      if (permiso.idPermiso === removedPermisoId) {
+        return {
+          ...permiso,
+          estado: 'I'
+        };
+      }
+      return permiso;
+    });
+  
+    const activePermisos = updatedListPermisos.filter(permiso => permiso.estado === 'A');
+  
+    setFormState(prevState => ({
+      ...prevState,
+      listPermisos: activePermisos
+    }));
+  };          
+   
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -88,7 +107,7 @@ const ModificarRole = (props) => {
           descripcion : '',
           mnemonico : '',
           estado : '',
-          usuarioCreacion : '',
+          usuarioCreacion :  nombreUsuario,
           listPermisos : []
         });
         // Cerrar el modal después de enviar el formulario
@@ -180,10 +199,10 @@ const ModificarRole = (props) => {
         descripcion: data.descripcion,
         mnemonico: data.mnemonico,
         estado: data.estado,
-        usuarioCreacion: data.usuarioCreacion,
-        listPermisos: data.listPermisos,
-        idEmpresa: data.listPermisos[0].idCanal
-      });
+        usuarioCreacion: nombreUsuario,
+        listPermisos: data.listPermisos || [],
+        idEmpresa: data.listPermisos && data.listPermisos.length > 0 ? data.listPermisos[0].idCanal : ''
+      });      
       setDatospermisos(data.listPermisos)
     } catch (error) {
       console.error(error);

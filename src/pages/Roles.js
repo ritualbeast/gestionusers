@@ -11,7 +11,6 @@ import {
   TableRow,
   MenuItem,
   InputLabel,
-  Checkbox,
   Modal,
   TableBody,
   Radio, 
@@ -48,7 +47,7 @@ import { ConsultarRoles, EliminarRol } from '../services/ServicesRol';
 const TABLE_HEAD = [
   { id: 'id', label: 'Id', alignRight: false },
   { id: 'nombre', label: 'Nombre', alignRight: false },
-  { id: 'descripcion', label: 'Descripción', alignRight: false },
+  { id: 'descripcion', label: 'Descripcion', alignRight: false },
   { id: 'nemonico', label: 'Nemonico', alignLeft: false },
   { id: 'status', label: 'Status', alignRight: false },
   { id: 'action', label: 'Acciones' },
@@ -107,7 +106,7 @@ export default function UserPage() {
   const [isSelectUsed, setIsSelectUsed] = useState(false);
   const [isToolbarUsed, setIsToolbarUsed] = useState(false); // Cambiar el orden
   const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
-  const [valorcheck2, setValorcheck2] = useState('N');
+  const [valorcheck2, setValorcheck2] = useState('No');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [isNotFound, setIsNotFound] = useState(false);
   const [checkedItems, setCheckedItems] = useState({
@@ -116,9 +115,9 @@ export default function UserPage() {
     estado: '',
   });  
   
-  const handleOpenMenu = (event, userId) => {
+  const handleOpenMenu = (event, roleId) => {
     setOpen(event.currentTarget);
-    setSelectedUserId(userId);
+    setSelectedUserId(roleId);
   };
 
   const handleCloseMenu = () => {
@@ -180,11 +179,8 @@ export default function UserPage() {
   const fetchData = async () => {
     try {
       // clear checkitems
-      setCheckedItems({
-        nombre: '',
-        descripcion: '',
-        estado: '',
-      });
+      setIsSelectUsed (false);
+      setSelectedOption('');
       setFilterName('');
       const response = await ConsultarRoles();
       console.log(response.data.listRoles)
@@ -246,7 +242,7 @@ const handleEliminar = async () => {
   const [selectedOption, setSelectedOption] = useState('');
   const options = [
     { value: 'No', label: 'Nombres' },
-    { value: 'De', label: 'Descripción' },
+    { value: 'De', label: 'Descripcion' },
     { value: 'E', label: 'Estado' },
   ];
 
@@ -404,7 +400,7 @@ const handleEliminar = async () => {
                           <TableCell>{user.nemonico}</TableCell>
                           <TableCell>{user.estado}</TableCell>
                           <TableCell align="center">
-                            <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idUsuario)}>
+                            <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idRol)}>
                               <Iconify icon={'eva:more-vertical-fill'} />
                             </IconButton>
                           </TableCell>

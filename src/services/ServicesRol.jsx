@@ -1,4 +1,4 @@
-const ConsultarRoles = async (filterName='A', checkedItems='E') => {
+const ConsultarRoles = async (filterName='T', checkedItems='E') => {
   try {
     const tokenUsuario = localStorage.getItem('token');
    
