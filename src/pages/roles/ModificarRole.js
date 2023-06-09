@@ -28,6 +28,7 @@ const ModificarRole = (props) => {
   });
   const [canales, setCanales] = useState([]);
   const [selectedPermisos, setSelectedPermisos] = useState([]);
+  const [deletedData, setDeletedData] = useState([]);
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
@@ -60,28 +61,8 @@ const ModificarRole = (props) => {
   };
   
   const handleDelete = (removedOption) => {
-    const updatedOptions = selectedPermisos.filter(option => option !== removedOption);
-    setSelectedPermisos(updatedOptions);
-  
-    const removedPermisoId = removedOption.idPermiso;
-  
-    const updatedListPermisos = formState.listPermisos.map(permiso => {
-      if (permiso.idPermiso === removedPermisoId) {
-        return {
-          ...permiso,
-          estado: 'I'
-        };
-      }
-      return permiso;
-    });
-  
-    const activePermisos = updatedListPermisos.filter(permiso => permiso.estado === 'A');
-  
-    setFormState(prevState => ({
-      ...prevState,
-      listPermisos: activePermisos
-    }));
-  };          
+    setDeletedData([...deletedData, removedOption]);
+  };  
    
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -330,8 +311,14 @@ const ModificarRole = (props) => {
                 }))}
                 isMulti
                 value={selectedPermisos}
-                onChange={handleChangePermisos}
-                onDelete={handleDelete}
+                onChange={(selectedOptions) => {
+                  handleChangePermisos(selectedOptions);
+                  selectedPermisos.forEach((option) => {
+                    if (!selectedOptions.includes(option)) {
+                      handleDelete(option);
+                    }
+                  });
+                }}
               />
             </Form.Group>
 

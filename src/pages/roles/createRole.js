@@ -25,6 +25,19 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
   const [canales, setCanales] = useState([]);
   const [permisosCanal, setPermisosCanal] = useState([]);
 
+  const [selectedPermisos, setSelectedPermisos] = useState([]);
+
+  useEffect(() => {
+    setSelectedPermisos(
+      formState.listPermisos.map((permiso) => ({
+        value: permiso.nombre,
+        label: permiso.nombre,
+        idPermiso: permiso.idPermiso,
+        estado: permiso.estado,
+      }))
+    );
+  }, [formState.listPermisos]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormState((prevState) => ({
@@ -43,10 +56,20 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
       nombre: option.value,
       estado: option.estado
     }));
+  
     setFormState((prevState) => ({
       ...prevState,
       listPermisos: selectedPermisos
     }));
+  
+    // Filtrar los permisos disponibles
+    const updatedPermisosCanal = permisosCanal.filter((permiso) => {
+      // Verificar si el permiso seleccionado ya existe en los permisos seleccionados
+      return !selectedPermisos.some((selectedPermiso) => selectedPermiso.idPermiso === permiso.idPermiso);
+    });
+  
+    setPermisosCanal(updatedPermisosCanal);
+  
     console.log('Permisos seleccionados:', selectedPermisos);
   };
 
@@ -257,7 +280,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
                   estado: permiso.estado
                 }))}
                 isMulti
-                value={formState.listPermisos}
+                value={selectedPermisos}
                 onChange={handleChangePermisos}
               />
             </Form.Group>
