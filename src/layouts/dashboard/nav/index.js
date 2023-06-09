@@ -4,16 +4,17 @@ import { useLocation } from 'react-router-dom';
 // @mui
 import { styled, alpha } from '@mui/material/styles';
 import { Box, Link,  Drawer, Typography, Avatar } from '@mui/material';
+import { Margin } from '@mui/icons-material';
 // mock
-import account from '../../../_mock/account';
-// hooks
-import useResponsive from '../../../hooks/useResponsive';
-// components
 import Scrollbar from '../../../components/scrollbar';
 import NavSection from '../../../components/nav-section';
-//
+
+import useResponsive from '../../../hooks/useResponsive';
 import navConfig from './config';
 import logo from '../../../assets/img/ic_goit.png';
+import '../../../styles/logo.css';
+
+import account from '../../../_mock/account';
 
 // ----------------------------------------------------------------------
 
@@ -53,17 +54,18 @@ export default function Nav({ openNav, onCloseNav }) {
         '& .simplebar-content': { height: 1, display: 'flex', flexDirection: 'column' },
       }}
     >
-      <Box sx={{ px: 2.5, py: 3, display: 'inline-flex' }}>
-        {logo && (
-          <Box
-            component="img"
-            src={logo}
-            sx={{ width: 80, height: 40 }}
-            color="inherit"
-          />
-        )}
-        
-      </Box>
+      <Box sx={{ px: 2.5, py: 3, display: 'inline-flex', width: '100%' }}>
+  {logo && (
+    <Box
+      component="img"
+      src={logo}
+      sx={{ width: 180, height: 80 }}
+      className='logo'
+      color="inherit"
+    />
+  )}
+</Box>
+
 
       <Box sx={{ mb: 5, mx: 2.5 }}>
         <Link underline="none">

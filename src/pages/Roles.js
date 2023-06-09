@@ -274,9 +274,13 @@ const handleEliminar = async () => {
     const { value } = event.target;
     setSelectedEstado(value);
     setIsSelectUsed(true);
-    console.log(value);
-    setFilterName(value);
-  };
+  
+    if (selectedOption === 'No') {
+      setFilterName(value); // Actualizar el filtro de nombre
+    } else if (selectedOption === 'De') {
+      // Aquí puedes realizar la búsqueda solo en la columna de descripción según tu lógica
+    }
+  };  
 
   return (
     <>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import '../../styles/createRole.css';
 import { toast } from 'react-toastify';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import KeyIcon from '@mui/icons-material/Key';
 import Select from 'react-select';
 import { ConsultarPermisos, ConsultarRolPorId, ActualizarRolesConPermisos, ConsultarCanal } from '../../services/ServicesRol';
 
@@ -28,7 +29,6 @@ const ModificarRole = (props) => {
   });
   const [canales, setCanales] = useState([]);
   const [selectedPermisos, setSelectedPermisos] = useState([]);
-  const [deletedData, setDeletedData] = useState([]);
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
@@ -36,14 +36,16 @@ const ModificarRole = (props) => {
   
   useEffect(() => {
     setSelectedPermisos(
-      formState.listPermisos.map((permiso) => ({
-        value: permiso.nombre,
-        label: permiso.nombre,
-        idPermiso: permiso.idPermiso,
-        estado: permiso.estado,
-      }))
+      formState.listPermisos
+        .filter(permiso => permiso.estado === "A")
+        .map((permiso) => ({
+          value: permiso.nombre,
+          label: permiso.nombre,
+          idPermiso: permiso.idPermiso,
+          estado: permiso.estado,
+        }))
     );
-  }, [formState.listPermisos]);
+  }, [formState.listPermisos]);  
   
   const handleChangePermisos = (selectedOptions) => {
     setSelectedPermisos(selectedOptions);
@@ -60,9 +62,32 @@ const ModificarRole = (props) => {
     }));
   };
   
-  const handleDelete = (removedOption) => {
-    setDeletedData([...deletedData, removedOption]);
-  };  
+  // const handleDelete = (removedOption) => {
+  //   // Verificar si el estado actual del permiso es diferente de "I"
+  //   if (removedOption.estado !== "I") {
+  //     // Actualizar el estado del permiso a "I"
+  //     const updatedPermisos = selectedPermisos.map(option => {
+  //       if (option === removedOption) {
+  //         return {
+  //           ...option,
+  //           estado: "I"
+  //         };
+  //       }
+  //       return option;
+  //     });
+  
+  //     setSelectedPermisos(updatedPermisos);
+  
+  //     // Imprimir los permisos con estado "A" e "I"
+  //     const activePermisos = updatedPermisos.filter(option => option.estado === "A");
+  //     const inactivePermisos = updatedPermisos.filter(option => option.estado === "I");
+  //     console.log("Permisos activos:", activePermisos);
+  //     console.log("Permisos inactivos:", inactivePermisos);
+  //   } else {
+  //     // El permiso ya se encuentra en estado "I", mostrar mensaje de error o realizar otra acción
+  //     console.log("El permiso ya se encuentra en estado I");
+  //   }
+  // };   
    
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,14 +108,14 @@ const ModificarRole = (props) => {
             fontSize: '11px' // Tamaño de letra deseado
           }
         });
-        setFormState({
-          nombre : '',
-          descripcion : '',
-          mnemonico : '',
-          estado : '',
-          usuarioCreacion :  nombreUsuario,
-          listPermisos : []
-        });
+        // setFormState({
+        //   nombre : '',
+        //   descripcion : '',
+        //   mnemonico : '',
+        //   estado : '',
+        //   usuarioCreacion :  nombreUsuario,
+        //   listPermisos : []
+        // });
         // Cerrar el modal después de enviar el formulario
           setTimeout(() => {
           handleRefresh();
@@ -217,6 +242,9 @@ const ModificarRole = (props) => {
       </Button>
       <Row className="justify-content-center">
         <Col md={6}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <KeyIcon style={{ width: 50, height: 50 }} />
+        </div>
           <h2>Editar Rol</h2>
           {showErrorMessage && (
             <div className="error-message">Todos los campos son obligatorios</div>
@@ -311,14 +339,7 @@ const ModificarRole = (props) => {
                 }))}
                 isMulti
                 value={selectedPermisos}
-                onChange={(selectedOptions) => {
-                  handleChangePermisos(selectedOptions);
-                  selectedPermisos.forEach((option) => {
-                    if (!selectedOptions.includes(option)) {
-                      handleDelete(option);
-                    }
-                  });
-                }}
+                onChange={handleChangePermisos}
               />
             </Form.Group>
 

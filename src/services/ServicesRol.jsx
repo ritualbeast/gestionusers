@@ -113,6 +113,7 @@ const ConsultarRolPorId = async (rolId) => {
 
 const ActualizarRolesConPermisos = async (rolId, userData) => {
   console.log('userId', rolId)
+  console.log('Campos que se están actualizando:', userData);
   try {
     const tokenUsuario = localStorage.getItem('token');
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';

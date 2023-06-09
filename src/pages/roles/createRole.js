@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import '../../styles/createRole.css';
 import { toast } from 'react-toastify';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import KeyIcon from '@mui/icons-material/Key';
 import Select from 'react-select';
 import { ConsultarPermisos, CrearRol, ConsultarCanal } from '../../services/ServicesRol';
 
@@ -188,6 +189,9 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
     <Container>
       <Row className="justify-content-center">
         <Col md={6}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <KeyIcon style={{ width: 50, height: 50 }} />
+        </div>
           <h2>Crear nuevo Rol</h2>
           {showErrorMessage && (
             <div className="error-message">Todos los campos son obligatorios</div>
@@ -200,7 +204,6 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 type="text"
                 name="nombre"
-                placeholder="Nombre del rol"
                 onChange={handleChange}
                 required
               />
@@ -213,7 +216,6 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 as="textarea"
                 name="descripcion"
-                placeholder="Descripción del rol"
                 onChange={handleChange}
                 required
               />
@@ -226,7 +228,6 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 as="textarea"
                 name="mnemonico"
-                placeholder="Nombre del rol"
                 onChange={handleChange}
                 required
               />
