@@ -11,9 +11,12 @@ import {
   TableRow,
   MenuItem,
   InputLabel,
-  Checkbox,
   Modal,
   TableBody,
+  Radio, 
+  RadioGroup,
+  FormLabel,
+  FormControlLabel,
   TableCell,
   Container,
   Typography,
@@ -44,7 +47,7 @@ import { ConsultarRoles, EliminarRol } from '../services/ServicesRol';
 const TABLE_HEAD = [
   { id: 'id', label: 'Id', alignRight: false },
   { id: 'nombre', label: 'Nombre', alignRight: false },
-  { id: 'descripcion', label: 'Descripción', alignRight: false },
+  { id: 'descripcion', label: 'Descripcion', alignRight: false },
   { id: 'nemonico', label: 'Nemonico', alignLeft: false },
   { id: 'status', label: 'Status', alignRight: false },
   { id: 'action', label: 'Acciones' },
@@ -103,23 +106,18 @@ export default function UserPage() {
   const [isSelectUsed, setIsSelectUsed] = useState(false);
   const [isToolbarUsed, setIsToolbarUsed] = useState(false); // Cambiar el orden
   const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
-  const [valorcheck, setValorcheck] = useState([]);
-  const [valorcheck2, setValorcheck2] = useState('N');
+  const [valorcheck2, setValorcheck2] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [datosRole, setDatosRole] = useState([]);
-
+  const [isNotFound, setIsNotFound] = useState(false);
   const [checkedItems, setCheckedItems] = useState({
     nombre: '',
     descripcion: '',
     estado: '',
   });  
   
-  const handleOpenMenu = (event, userId) => {
-    
+  const handleOpenMenu = (event, roleId) => {
     setOpen(event.currentTarget);
-    console.log(userId)
-    setSelectedUserId(userId);
-    console.log(selectedUserId)
+    setSelectedUserId(roleId);
   };
 
   const handleCloseMenu = () => {
@@ -128,31 +126,10 @@ export default function UserPage() {
 
   const handleOpenEliminar = () => {
     setOpenEliminar(true);
-    handleCloseMenu();
   };
 
   const handleCloseEliminar = () => {
     setOpenEliminar(false);
-  };
-
-  const filteredUsers = applySortFilter(datosUser, getComparator(order, orderBy), filterName);
-  const isNotFound = !filteredUsers.length && !!filterName;
-
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
-
-  const handleOpenModificar = () => {
-    setOpenModificar(true);
-    handleCloseMenu();
-  };
-
-  const handleCloseModificar = () => {
-    setOpenModificar(false);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -174,55 +151,65 @@ export default function UserPage() {
     }
   };
 
+  // const filteredUsers = applySortFilter(datosUser, getComparator(order, orderBy), filterName);
+  // // const isNotFound = !filteredUsers.length && !!filterName;
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleOpenModificar = () => {
+    setOpenModificar(true);
+  };
+
+  const handleCloseModificar = () => {
+    setOpenModificar(false);
+  };
+
   useEffect(() => {
     // verificarLocalStorage();
     fetchData();
 
   }, []);
-  
-  // const verificarLocalStorage = () => {
-  //   const isAdmin = localStorage.getItem("nombreUsuario");
-  //   if (isAdmin === null) {
-  //     window.location.href = "/login";
-  //   }
-  // }
+
   const fetchData = async () => {
-    console.log('ok')
     try {
       // clear checkitems
-      setCheckedItems({
-        nombre: '',
-        descripcion: '',
-        estado: '',
-      });
+      setIsSelectUsed (false);
+      setSelectedOption('');
       setFilterName('');
       const response = await ConsultarRoles();
-      console.log(response.data.listRoles)
       setDatosUser(response.data.listRoles);
     } catch (error) {
       console.error(error);
     }
   };
 
-const handleFiltrar = async () => {
-  try {
-    console.log(filterName,valorcheck2)
-    const response = await ConsultarRoles(filterName, valorcheck2);
-    if (response.success === true) {
-      console.log(response);
-      setDatosUser(response.data.row);
-      
-    } else {
-      toast.error(`${response.message}`
-        , {
-          position: "bottom-right",
-          autoClose: 2000,
+  const handleFiltrar = async () => {
+    try {
+      console.log(filterName,selectedOption)
+      const response = await ConsultarRoles(filterName, selectedOption);
+      if (response.data.listRoles.length === 0) {
+        toast.error(`No se encontraron resultados para la busqueda: ${filterName}`, {
+          autoClose: 1500,
         });
+      } else if (response.success === true) {
+        setDatosUser(response.data.listRoles);
+      } else {
+        toast.error(`${response.message}`
+          , {
+            position: "bottom-right",
+            autoClose: 2000,
+          });
+      }
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
-  }
-};
+  };
 
 const handleEliminar = async () => {
   try {
@@ -251,36 +238,54 @@ const handleEliminar = async () => {
   }
 };
 
-const handleRefresh = async () => {
-  await fetchData();
-};
+   const paginatedData = datosUser.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  
+  const [selectedOption, setSelectedOption] = useState('');
+  const options = [
+    { value: 'No', label: 'Nombres' },
+    { value: 'De', label: 'Descripcion' },
+    { value: 'E', label: 'Estado' },
+  ];
 
-const handleCheckboxChange = (event) => {
-  if (event.target.checked) {
+  const getOptionLabel = (value) => {
+    const option = options.find((opt) => opt.value === value);
+    return option ? option.label : '';
+  };
+  const [selectedEstado, setSelectedEstado] = useState('');
+  const [showEstadoOptions, setShowEstadoOptions] = useState(false);
+  const handleOptionChange = (event) => {
+    const { value } = event.target;
+    setSelectedOption(value);
     setIsSelectUsed(true);
-  }
-  else {
-    setIsSelectUsed(false);
-  }
+    const option = event.target.value;
+      setSelectedOption(option);
 
-  const { name, checked } = event.target;
-  if (checked) {
-    setCheckedItems({ ...checkedItems, [name]: true });
-    setValorcheck2(event.target.value);
-  } else {
-    const { [name]: _, ...updatedCheckedItems } = checkedItems;
-    setCheckedItems(updatedCheckedItems);
-  }
-  const selectedValues = Object.keys(checkedItems).filter((item) => checkedItems[item]);
-  setValorcheck(selectedValues);
+      if (option === 'E') {
+        setShowEstadoOptions(true);
+        setIsToolbarUsed(true);
+
+      } else if (option !== 'E') 
+      {
+        setShowEstadoOptions(false);
+        setIsToolbarUsed(false);
+      }
+  };
+
+  const handleEstadoChange = (event) => {
+    const { value } = event.target;
+    setSelectedEstado(value);
+    setIsSelectUsed(true);
   
-  
-};
-  const paginatedData = filteredUsers.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  
+    if (selectedOption === 'No') {
+      setFilterName(value); // Actualizar el filtro de nombre
+    } else if (selectedOption === 'De') {
+      // Aquí puedes realizar la búsqueda solo en la columna de descripción según tu lógica
+    }
+  };  
 
   return (
     <>
+      <ToastContainer />
       <Helmet>
         <title> Role | Minimal UI </title>
       </Helmet>
@@ -298,97 +303,122 @@ const handleCheckboxChange = (event) => {
           </Stack>
 
           <Card>
-              <div style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
-              
-              <FormControl variant="outlined"  style={{ width: '20%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
+              <FormControl variant="outlined" style={{ width: '20%' }}>
                 <InputLabel id="select-label">Filtrar por</InputLabel>
                 <Select
                   labelId="select-label"
-                  multiple = {false}
-                  value={Object.keys(checkedItems).filter((item) => checkedItems[item])}
-                  onChange={handleCheckboxChange}
-                  renderValue={(selected) => selected.join(', ')}
+                  value={selectedOption}
+                  onChange={handleOptionChange}
+                  label="Filtrar por"
+                  renderValue={(selected) => getOptionLabel(selected) || 'Seleccionar'}
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+                    getContentAnchorEl: null,
+                  }}
                 >
-                  <MenuItem >
-                    <Checkbox checked={checkedItems.nombre} onChange={handleCheckboxChange} name="nombre" value='No' />
-                    <InputLabel>Nombre</InputLabel>
-                  </MenuItem>
-                  <MenuItem >
-                    <Checkbox checked={checkedItems.descripcion} onChange={handleCheckboxChange} name="descripcion" value='De' />
-                    <InputLabel>Descripción</InputLabel>
-                  </MenuItem>
-                  <MenuItem >
-                    <Checkbox checked={checkedItems.estado} onChange={handleCheckboxChange} name="estado" value='E' />
-                    <InputLabel>Estado</InputLabel>
-                  </MenuItem>
+                  {options.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-              
-              <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
 
-              <Button style={{ margin : '0 0 0 1rem' }}
-                variant="contained"  onClick={handleFiltrar} disabled={isButtonDisabled}>
+            {selectedOption === 'E' && (
+              <>
+                <FormControl component="fieldset" style={{ marginLeft: '1rem' }}>
+                  <FormLabel component="legend">Estado</FormLabel>
+                  <RadioGroup
+                    aria-label="estado"
+                    name="estado"
+                    value={selectedEstado}
+                    onChange={handleEstadoChange}
+                    style={{ flexDirection: 'row' }}
+                  >
+                    <FormControlLabel
+                      value="A"
+                      control={<Radio />}
+                      label="Activo"
+                    />
+                    <FormControlLabel
+                      value="I"
+                      control={<Radio />}
+                      label="Inactivo"
+                    />
+                  </RadioGroup>
+                </FormControl>
+              </>
+            )}
+            {!showEstadoOptions && (
+              <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+            )          
+            }
+              
+              <Button style={{ margin: '0 0 0 1rem' }} variant="contained" onClick={handleFiltrar} disabled={isButtonDisabled}>
                 Filtrar
               </Button>
-              <Button style={{ margin : '0 0 0 1rem' }}
-                variant="contained"  onClick={fetchData}>
+              <Button style={{ margin: '0 0 0 1rem' }} variant="contained" onClick={fetchData}>
                 Limpiar
               </Button>
-              
-              </div>
+            </div>
 
               <Scrollbar>
-                  <TableContainer sx={{ minWidth: 800 }}>
-                      <Table>
-                          <UserListHead
-                            headLabel={TABLE_HEAD}
-                          />
-                          <TableBody>
-                          
-                            {Array.isArray(paginatedData) && paginatedData.map((user, index) => (
-                              
-                              <TableRow key={user.idRol}>
-                                <TableCell> 
-                                  {index + 1}
-                                </TableCell>
-                                <TableCell>{user.nombre}</TableCell>
-                                <TableCell>{user.descripcion}</TableCell>
-                                <TableCell>{user.nemonico}</TableCell>
-                                <TableCell>{user.estado}</TableCell>
-                                <TableCell align="center">
-                                  <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idRol)}>
-                                    <Iconify icon={'eva:more-vertical-fill'} />
-                                  </IconButton>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                          {isNotFound && (
-                          <TableBody>
-                            <TableRow>
-                              <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                                <Paper
-                                  sx={{
-                                    textAlign: 'center',
-                                  }}
-                                >
-                                  <Typography variant="h6" paragraph>
-                                    Sin resultados
-                                  </Typography>
+                <TableContainer sx={{ minWidth: 800 }}>
+                <Table>
+                  <UserListHead headLabel={TABLE_HEAD} />
+                  
+                  {isNotFound ? (
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                          <Paper
+                            sx={{
+                              textAlign: 'center',
+                            }}
+                          >
+                            <Typography variant="h6" paragraph>
+                              Sin resultados
+                            </Typography>
+                            <Typography variant="body2">
+                              No existen resultados para  &nbsp;
+                              <strong>&quot;{filterName}&quot;</strong>.
+                              <br /> Intenta verificar errores tipográficos o buscar por otra palabra.
+                            </Typography>
+                          </Paper>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  ) : (
+                    <TableBody>
+                      {Array.isArray(paginatedData) && paginatedData.map((user, index) => (
+                        <TableRow key={user.idUsuario}>
+                          <TableCell>{index + 1}</TableCell>
+                          <TableCell>{user.nombre}</TableCell>
+                          <TableCell>{user.descripcion}</TableCell>
+                          <TableCell>{user.nemonico}</TableCell>
+                          <TableCell>{user.estado}</TableCell>
+                          <TableCell align="center">
+                            <IconButton size="large" color="inherit" onClick={(event) => handleOpenMenu(event, user.idRol)}>
+                              <Iconify icon={'eva:more-vertical-fill'} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  )}
+                </Table>
 
-                                  <Typography variant="body2">
-                                    No existen resultados para  &nbsp;
-                                    <strong>&quot;{filterName}&quot;</strong>.
-                                    <br /> Intenta verificar errores tipográficos o buscar por otra palabra.
-                                  </Typography>
-                                </Paper>
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        )}
-                      </Table>
-                  </TableContainer>
+                </TableContainer>
               </Scrollbar>
+              
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
@@ -398,7 +428,7 @@ const handleCheckboxChange = (event) => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
-          </Card>
+            </Card>
       </Container>
 
       <Menu
@@ -486,10 +516,9 @@ const handleCheckboxChange = (event) => {
             handleCloseModificar={handleCloseModificar} 
             roleId={selectedUserId}
             handleRefresh = {fetchData}
+            
           />
-          
         </Box>
-        
       </Modal>
 
       <Modal

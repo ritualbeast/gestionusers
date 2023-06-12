@@ -1,4 +1,4 @@
-const ConsultarRoles = async (filterName='A', checkedItems='E') => {
+const ConsultarRoles = async (filterName='T', checkedItems='E') => {
   try {
     const tokenUsuario = localStorage.getItem('token');
    
@@ -13,9 +13,8 @@ const ConsultarRoles = async (filterName='A', checkedItems='E') => {
       method: 'GET',
       headers,
     };
-    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/consultarRoles/${checkedItems}/${filterName}/?pagina=1&size=10`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/consultarRoles/${checkedItems}/${filterName}/?pagina=1&size=100`, requestOptions);
     const data = await response.json();
-    console.log(data)
     
     return data; // Devolver los datos obtenidos
 
@@ -25,12 +24,9 @@ const ConsultarRoles = async (filterName='A', checkedItems='E') => {
   }
 };
 
-const ConsultarPermisos = async () => {
-
-  const canalxDefecto = '49a5f60a-9f56-4feb-bcf1-5377c6152ef8'
+const ConsultarPermisos = async (canalxDefecto) => {
   try {
     const tokenUsuario = localStorage.getItem('token');
-   
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
     const token = `Bearer ${tokenUsuario}`;
     const headers = {
@@ -44,11 +40,7 @@ const ConsultarPermisos = async () => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/permisos/consultarPermisosPorIdCanal/${canalxDefecto}`, requestOptions);
     const data = await response.json();
-    console.log(data)
-    
-    
     return data; // Devolver los datos obtenidos
-
   } catch (error) {
     console.error(error);
     throw error; // Lanzar el error para que sea capturado en el lugar donde se llama a la función
@@ -93,7 +85,6 @@ const CrearRol = async (datosRol) => {
 };
 
 const ConsultarRolPorId = async (rolId) => {
-  console.log(rolId)
   try {
     const tokenUsuario = localStorage.getItem('token');
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
@@ -110,7 +101,6 @@ const ConsultarRolPorId = async (rolId) => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/consultarRolPorId/${rolId}`, requestOptions);
     const data = await response.json();
-    console.log(data);
     
     return data; // Devolver los datos obtenidos
 
@@ -121,7 +111,7 @@ const ConsultarRolPorId = async (rolId) => {
 };
 
 const ActualizarRolesConPermisos = async (rolId, userData) => {
-  console.log('userId', rolId)
+  console.log('Campos que se están actualizando:', userData);
   try {
     const tokenUsuario = localStorage.getItem('token');
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
@@ -139,7 +129,6 @@ const ActualizarRolesConPermisos = async (rolId, userData) => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/actualizarRolesConPermisos/${rolId}`, requestOptions);
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error);
@@ -147,7 +136,7 @@ const ActualizarRolesConPermisos = async (rolId, userData) => {
   }
 };
 
-const EliminarRol= async (rolId) => {
+const EliminarRol= async (roleId) => {
   try {
     const tokenUsuario = localStorage.getItem('token');
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';
@@ -161,7 +150,7 @@ const EliminarRol= async (rolId) => {
       method: 'DELETE',
       headers,
     };
-    const response = await fetch(`http://localhost:8988/goit-security-api/v2/roles/eliminarRol/${rolId}`, requestOptions);
+    const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/eliminarRol/${roleId}`, requestOptions);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -187,7 +176,6 @@ const ConsultarCanal = async () => {
     const url = 'http://desa.goitsa.me:8988/goit-security-api/v2/canal/consultarCanales';
     const response = await fetch(url, requestOptions);
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error);

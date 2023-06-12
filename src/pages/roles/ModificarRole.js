@@ -1,58 +1,171 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable prefer-const */
+
 import React, { useEffect, useState } from 'react';
 import '../../styles/createRole.css';
 import { toast } from 'react-toastify';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import KeyIcon from '@mui/icons-material/Key';
 import Select from 'react-select';
 import { ConsultarPermisos, ConsultarRolPorId, ActualizarRolesConPermisos, ConsultarCanal } from '../../services/ServicesRol';
 
 const ModificarRole = (props) => {
-  
-  const {handleCloseModificar, handleRefresh, roleId, rolId}= props;
-  // const { , handleRefresh } = props;
+  const {handleCloseModificar, handleRefresh, roleId}= props;
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [datosRecibidosporId, setDatosRecibidosporId] = useState([]);
   const [permisos, setPermisos] = useState([]);
   const [consultaCanal, setConsultaCanal] = useState([]);
   const [error, setError] = useState("");
+  const [nombreUsuario, setNombreUsuario] = useState(localStorage.getItem('nombreUsuario'));
   const [userIdPermiso, setUserIdPermiso] = useState(roleId);
   const [camposIncompletos, setCamposIncompletos] = useState([]);
+  const [datospermisos, setDatospermisos] = useState([])
   const [formState, setFormState] = useState({
-    nombre : '',
-    descripcion : '',
-    mnemonico : '',
-    estado : '',
-    usuarioCreacion : localStorage.getItem('nombreUsuario'),
-    listPermisos : []
+    nombre: '',
+    descripcion: '',
+    mnemonico: '',
+    estado: '',
+    usuarioCreacion: nombreUsuario,
+    listPermisos: [],
+    idEmpresa: ''
   });
+  const [canales, setCanales] = useState([]);
+  const [selectedPermisos, setSelectedPermisos] = useState([]);
+  const [formStatePermiso, setFormStatePermiso] = useState([]);
+  const [formStatePermisoBase, setFormStatePermisoBase] = useState([]);
 
   const handleChange = (e) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
-
+  
+  useEffect(() => {
+    setSelectedPermisos(
+      formState.listPermisos
+        .filter(permiso => permiso.estado === "A")
+        .map((permiso) => ({
+          value: permiso.nombre,
+          label: permiso.nombre,
+          idPermiso: permiso.idPermiso,
+          estado: permiso.estado,
+          idEmpresa: permiso.idEmpresa
+        }))
+    );
+  }, [formState.listPermisos]);  
+  
   const handleChangePermisos = (selectedOptions) => {
-    const selectedPermisos = selectedOptions.map((option) => ({
-      value: option.value,
-      label: option.label,
+    setSelectedPermisos(selectedOptions);
+  
+    // Guardar los datos actualizados en listPermisos
+    const updatedListPermisos = selectedOptions.map(option => ({
+      nombre: option.value,
       idPermiso: option.idPermiso,
       estado: option.estado
     }));
-    setFormState((prevState) => ({ ...prevState, listPermisos: selectedPermisos }));
+    setFormState(prevState => ({
+      ...prevState,
+      listPermisos: updatedListPermisos
+    }));
   };
 
-  const sendData = async () => {
-    try {
-      const response = await ActualizarRolesConPermisos(roleId, formState);
-      console.log(response.success);
-    } catch (error) {
-      console.error(error);
-    }
+  const updateFormStatePermiso = () => {
+    const objeTemp = [];
+  
+    selectedPermisos.forEach((op) => {
+      permisos.forEach((permiso) => {
+        if (op.value === permiso.nombre) {
+          objeTemp.push({
+            "idPermiso": permiso.idPermiso,
+            "nombre": permiso.nombre,
+            "estado": permiso.estado
+          });
+        }
+      });
+    });
+  
+    setFormStatePermiso(objeTemp);
   };
 
+  useEffect(() => {
+    updateFormStatePermiso();
+  }, [selectedPermisos]);
+  
+  // const handleDelete = (removedOption) => {
+  //   // Verificar si el estado actual del permiso es diferente de "I"
+  //   if (removedOption.estado !== "I") {
+  //     // Actualizar el estado del permiso a "I"
+  //     const updatedPermisos = selectedPermisos.map(option => {
+  //       if (option === removedOption) {
+  //         return {
+  //           ...option,
+  //           estado: "I"
+  //         };
+  //       }
+  //       return option;
+  //     });
+  
+  //     setSelectedPermisos(updatedPermisos);
+  
+  //     // Imprimir los permisos con estado "A" e "I"
+  //     const activePermisos = updatedPermisos.filter(option => option.estado === "A");
+  //     const inactivePermisos = updatedPermisos.filter(option => option.estado === "I");
+  //     console.log("Permisos activos:", activePermisos);
+  //     console.log("Permisos inactivos:", inactivePermisos);
+  //   } else {
+  //     // El permiso ya se encuentra en estado "I", mostrar mensaje de error o realizar otra acción
+  //     console.log("El permiso ya se encuentra en estado I");
+  //   }
+  // };   
+   
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await ActualizarRolesConPermisos(roleId, formState);
+
+
+      let objSendI = [];
+      formStatePermisoBase.forEach(element => {
+        let validate=false;
+        formStatePermiso.forEach(el => {
+          if (element.idPermiso === el.idPermiso) { 
+            console.log('element.idPermiso', element.idPermiso);
+            console.log('el.idPermiso', el.idPermiso);         
+
+            validate=true
+          }   
+        });
+        console.log(validate);
+        if (validate === false) console.log('inactiva:', element.idPermiso)
+        if (!validate) element.estado = 'I';
+        if (!validate) objSendI.push(element);
+      });
+
+      console.log(formStatePermisoBase)
+      console.log(formStatePermiso)
+      console.log(objSendI)
+
+
+      let objSend = [];
+
+      if (objSendI.length !== 0) {
+        objSend = formStatePermiso;
+        objSendI.forEach((data) =>{
+          objSend.push(data);
+        })
+        
+      }else{
+        objSend = formStatePermiso
+      }
+
+      console.log('objSend', objSend)
+
+    setFormState(prevState => ({
+      ...prevState,
+      listPermisos: objSend
+    }));
+
+    let ojS = formState;
+    ojS.listPermisos = objSend
+
+      const response = await ActualizarRolesConPermisos(roleId, ojS);
       console.log(response.success);
       if (response.success === true) {
         toast.success(`${response.message}`, {
@@ -67,14 +180,6 @@ const ModificarRole = (props) => {
           style: {
             fontSize: '11px' // Tamaño de letra deseado
           }
-        });
-        setFormState({
-          nombre : '',
-          descripcion : '',
-          mnemonico : '',
-          estado : '',
-          usuarioCreacion : '',
-          listPermisos : []
         });
         // Cerrar el modal después de enviar el formulario
           setTimeout(() => {
@@ -106,6 +211,10 @@ const ModificarRole = (props) => {
           }
         });
       }
+
+      console.log('roles del usuario:', formStatePermiso);
+
+
     } catch (error) {
       console.error(error);
       setError('Error al enviar el formulario');
@@ -116,39 +225,35 @@ const ModificarRole = (props) => {
     fetchData();
     consultarCanales();
     obtenerPermisos();
-    consultaPermisos();
-    
+   // consultaPermisos();
   }, []);
 
   const obtenerPermisos = async () => {
     try {
-      const data = await ConsultarPermisos(userIdPermiso);
-      console.log(data)
+      const idCanales = await recibirIdEmpresa()
+      const data = await ConsultarPermisos(idCanales);
+      const permisos = data.data.listPermisos;
+      setPermisos(permisos);
 
-      setPermisos(data.data.listPermisos);
-      
     } catch (error) {
       console.error(error);
     }
   };
   
-  const consultaPermisos = async () => {
-    try{
-      const response = await ConsultarPermisos();
-      console.log(response.data.listPermisos)
-      const canales = response.data.listPermisos
-      setConsultaCanal(canales);
-      
-    } catch (error) {
-      console.error('Error al consultar los canales:', error);
-    }
-  }
+  // const consultaPermisos = async () => {
+  //   try {
+  //     const response = await ConsultarPermisos(permisoCanalId); // Pasa userIdPermiso como argumento
+  //     const canales = response.data.listPermisos;
+  //     setConsultaCanal(canales);
 
-  const [canales, setCanales] = useState([]);
+  //   } catch (error) {
+  //     console.error('Error al consultar los canales:', error);
+  //   }
+  // };
+
   const consultarCanales = async () => {
     try{
       const response = await ConsultarCanal();
-      console.log(response.data.row)
       const canales = response.data.row
       setCanales(canales);
 
@@ -159,31 +264,92 @@ const ModificarRole = (props) => {
   }
 
   const fetchData = async () => {
+    console.log('entra')
     try {
-      const response = await ConsultarRolPorId(roleId);
-      const data = await response;
+      const response = await ConsultarRolPorId(userIdPermiso);
+      const data = response.data;
+
       setDatosRecibidosporId(response);
-      
       setFormState({
-        nombre: data.data.nombre,
-        descripcion: data.data.descripcion,
-        mnemonico: data.data.mnemonico,
-        estado: data.data.estado,
-        usuarioCreacion: localStorage.getItem('nombreUsuario'),
-        listPermisos: data.data.listPermisos
-      });
-  
+        nombre: data.nombre,
+        descripcion: data.descripcion,
+        mnemonico: data.mnemonico,
+        estado: data.estado,
+        usuarioCreacion: nombreUsuario,
+        listPermisos: data.listPermisos || [],
+        idEmpresa: data.listPermisos && data.listPermisos.length > 0 ? data.listPermisos[0].idCanal : ''
+      });      
+      setDatospermisos(data.listPermisos)
+      console.log('entra')
+
+
+      const permisos = response.data && response.data.listPermisos;
+      console.log(response)
+
+      if (permisos) {
+        setFormStatePermisoBase(
+          permisos.map((permiso) => ({
+            nombre: permiso.nombre,
+            idPermiso: permiso.idPermiso,
+            estado: permiso.estado
+          }))
+        );
+        console.log(permisos)
+      }
+      console.log(permisos)
+      console.log('entra')
+
+      // const objeTemp = [];
+      
+
+      // permisos.forEach((permiso)=>{
+      //     objeTemp.push(
+      //       {
+      //         "idPermiso": permiso.idPermiso,
+      //         "nombre": permiso.nombre,
+      //         "estado": permiso.estado
+      //       }
+      //     );
+
+      // })
+      // console.log(objeTemp)
+      // console.log(permisos)
+      // setFormStatePermisoBase(objeTemp)
     } catch (error) {
       console.error(error);
     }
-  };  
-  console.log(formState);
-  const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
+  };
 
+  const recibirIdEmpresa = () => {
+    return new Promise((resolve) => {
+      ConsultarRolPorId(userIdPermiso)
+        .then((response) => {
+          const data = response.data;
+          resolve(data.listPermisos[0].idCanal);
+        })
+        .catch((error) => {
+          console.error(error);
+          resolve(null);
+        });
+    });
+  };
+  
+  // const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
+
+  const test = () => {
+    console.log(formState);
+  };
+ 
   return (
     <Container>
+      <Button onClick={test}>
+          :v 
+      </Button>
       <Row className="justify-content-center">
         <Col md={6}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <KeyIcon style={{ width: 50, height: 50 }} />
+        </div>
           <h2>Editar Rol</h2>
           {showErrorMessage && (
             <div className="error-message">Todos los campos son obligatorios</div>
@@ -277,7 +443,7 @@ const ModificarRole = (props) => {
                   estado: permiso.estado
                 }))}
                 isMulti
-                value={formState.listPermisos}
+                value={selectedPermisos}
                 onChange={handleChangePermisos}
               />
             </Form.Group>

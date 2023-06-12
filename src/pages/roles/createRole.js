@@ -1,188 +1,306 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useEffect, useState } from 'react';
 import '../../styles/createRole.css';
+import { toast } from 'react-toastify';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import KeyIcon from '@mui/icons-material/Key';
 import Select from 'react-select';
-import { ConsultarPermisos, ConsultarCanal } from '../../services/ServicesRol';
+import { ConsultarPermisos, CrearRol, ConsultarCanal } from '../../services/ServicesRol';
 
-const CreateRole = (props) => {
-  const { userIdPermiso } = props;
-  const [formState, setFormState] = useState({
-    firstName: '',
-    description: '',
-    estado: '--selecione--',
-    canal: '--selecione--',
-    permisos: []
-  });
+const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [permisos, setPermisos] = useState([]);
   const [consultaCanal, setConsultaCanal] = useState([]);
-  
-  const handleChange = (event) => {
-    const { name, value, type } = event.target;
-  };
+  const [error, setError] = useState("");
+  const [userIdPermiso, setUserIdPermiso] = useState(userId);
+  const [camposIncompletos, setCamposIncompletos] = useState([]);
+  const [formState, setFormState] = useState({
+    nombre : '',
+    descripcion : '',
+    mnemonico : '',
+    estado : '',
+    usuarioCreacion : localStorage.getItem('nombreUsuario'),
+    listPermisos : [],
+    idCanal: ''
+  });
+  const [canales, setCanales] = useState([]);
+  const [permisosCanal, setPermisosCanal] = useState([]);
 
-  const handleChangePermisos = (selectedOptions) => {
-    const selectedPermisos = selectedOptions.map((option) => option.value);
-    setFormState({ ...formState, permisos: selectedPermisos });
-  };
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formState.firstName || !formState.description || formState.estado === '--selecione--') {
-      setShowErrorMessage(true);
-    } else {
-      // Lógica para enviar los datos del formulario
-      setShowErrorMessage(false);
-    }
-  };
-
-  const handleCancel = () => {
-    window.location.href = '/dashboard/roles';
-  };
+  const [selectedPermisos, setSelectedPermisos] = useState([]);
 
   useEffect(() => {
-    const obtenerPermisos = async () => {
-      try {
-        const data = await ConsultarPermisos(userIdPermiso);
-        setPermisos(data.data.listPermisos);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    setSelectedPermisos(
+      formState.listPermisos.map((permiso) => ({
+        value: permiso.nombre,
+        label: permiso.nombre,
+        idPermiso: permiso.idPermiso,
+        estado: permiso.estado,
+      }))
+    );
+  }, [formState.listPermisos]);
 
-    obtenerPermisos();
-  }, [userIdPermiso]);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormState((prevState) => ({
+      ...prevState,
+      [name]: value,
+      listPermisos: [], // Reinicia los permisos cuando cambia la opción del canal
+      idCanal: value // Conserva el valor de idCanal
+    }));
+    mostrarPermisos(value); // Actualiza los permisos según la opción seleccionada
+    console.log('Canal seleccionado:', value);
+  };  
+
+  const handleChangePermisos = (selectedOptions) => {
+    const selectedPermisos = selectedOptions.map((option) => ({
+      idPermiso: option.idPermiso,
+      nombre: option.value,
+      estado: option.estado
+    }));
+  
+    setFormState((prevState) => ({
+      ...prevState,
+      listPermisos: selectedPermisos
+    }));
+  
+    // Filtrar los permisos disponibles
+    const updatedPermisosCanal = permisosCanal.filter((permiso) => {
+      // Verificar si el permiso seleccionado ya existe en los permisos seleccionados
+      return !selectedPermisos.some((selectedPermiso) => selectedPermiso.idPermiso === permiso.idPermiso);
+    });
+  
+    setPermisosCanal(updatedPermisosCanal);
+  
+    console.log('Permisos seleccionados:', selectedPermisos);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await CrearRol(formState);
+      if (response.success === true) {
+        toast.success(`${response.message}`, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          style: {
+            fontSize: '11px' // Tamaño de letra deseado
+          }
+        });
+        setFormState({
+          nombre : '',
+          descripcion : '',
+          mnemonico : '',
+          estado : '',
+          usuarioCreacion : '',
+          listPermisos : []
+        });
+        // Cerrar el modal después de enviar el formulario
+          setTimeout(() => {
+          handleRefresh();
+          handleCloseModal(false)
+        }, 1500);
+      } else {
+        let errorMessage = 'Error al crear el usuario';
+        if (response.code === 400) {
+          errorMessage = 'Ha ocurrido un error en la solicitud';
+          setCamposIncompletos(errorMessage);
+        } else if (response.code === 500) {
+          errorMessage = 'Ha ocurrido un error en el servidor';
+        } else if (response.code === 401) {
+          errorMessage = 'No estás autorizado para realizar esta acción';
+        }
+        setError(errorMessage);
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          style: {
+            fontSize: '11px' // Tamaño de letra deseado
+          }
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      setError('Error al enviar el formulario');
+    }
+  };
 
   useEffect(() => {
     consultaPermisos();
+    obtenerPermisos();
     consultarCanales();
   }, []);
 
-  const consultaPermisos = async () => {
-    try{
-      const response = await ConsultarPermisos();
-      console.log(response.data.listPermisos)
-      const canales = response.data.listPermisos
-      setConsultaCanal(canales);
+  useEffect(() => {
+    mostrarPermisos(formState.idCanal);
+  }, [formState.idCanal]);  
+
+  const obtenerPermisos = async () => {
+    try {
+      const data = await ConsultarPermisos(userIdPermiso);
+      setPermisos(data.data.listPermisos);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const consultaPermisos = async (idCanal) => {
+    try {
+      const response = await ConsultarPermisos(idCanal);
+      const permisos = response.data.listPermisos;
+      setPermisosCanal(permisos);
+    } catch (error) {
+      console.error('Error al consultar los permisos:', error);
+    }
+  };  
+
+  const consultarCanales = async () => {
+    try {
+      const response = await ConsultarCanal();
+      const canales = response.data.row;
+      setCanales(canales);
     } catch (error) {
       console.error('Error al consultar los canales:', error);
     }
-  }
-  const [canales, setCanales] = useState([]);
-  const consultarCanales = async () => {
-    try{
-      const response = await ConsultarCanal();
-      console.log(response.data.row)
-      const canales = response.data.row
-      setCanales(canales);
+  };
 
+  const mostrarPermisos = async (opcion) => {
+    const canalSeleccionado = canales.find((canal) => canal.idCanal === opcion);
+    if (canalSeleccionado) {
+      const idCanal = canalSeleccionado.idCanal;
+      await consultaPermisos(idCanal);
     }
-    catch (error) {
-      console.error('Error al consultar los canales:', error);
-    }
-  }
-  
+  };  
+
   const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
 
   return (
     <Container>
       <Row className="justify-content-center">
         <Col md={6}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <KeyIcon style={{ width: 50, height: 50 }} />
+        </div>
           <h2>Crear nuevo Rol</h2>
           {showErrorMessage && (
             <div className="error-message">Todos los campos son obligatorios</div>
           )}
           <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="firstName" className={`form-group ${!formState.firstName && 'has-error'}`}>
+            <Form.Group controlId="nombre">
               <Form.Label>
-                Nombre {!formState.firstName && <span className="error-message">*</span>}
+                Nombre {<span className="error-message">*</span>}
               </Form.Label>
               <Form.Control
                 type="text"
-                name="firstName"
-                placeholder="Nombre del rol"
-                value={formState.firstName}
+                name="nombre"
                 onChange={handleChange}
                 required
               />
             </Form.Group>
 
-            <Form.Group controlId="description" className={`form-group ${!formState.description && 'has-error'}`}>
+            <Form.Group controlId="descripcion">
               <Form.Label>
-                Descripción {!formState.description && <span className="error-message">*</span>}
+                Descripción {<span className="error-message">*</span>}
               </Form.Label>
               <Form.Control
                 as="textarea"
-                name="description"
-                placeholder="Descripción del rol"
-                value={formState.description}
+                name="descripcion"
                 onChange={handleChange}
                 required
               />
             </Form.Group>
 
-            <Form.Group controlId="status" className={`form-group ${formState.estado === '--selecione--' && 'has-error'}`}>
+            <Form.Group controlId="mnemonico">
               <Form.Label>
-                Estado {formState.estado === '--selecione--' && <span className="error-message">*</span>}
+                Nemonico {<span className="error-message">*</span>}
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                name="mnemonico"
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group controlId="status">
+              <Form.Label>
+                Estado {<span className="error-message">*</span>}
               </Form.Label>
               <Form.Control
                 as="select"
                 name="estado"
-                value={formState.estado}
                 onChange={handleChange}
                 required
               >
                 <option value="--selecione--">--- Selecione ---</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="A">Activo</option>
+                <option value="I">Inactivo</option>
               </Form.Control>
             </Form.Group>
 
             <Form.Group controlId="canal">
               <Form.Label>
-                Canal {formState.canal === '--selecione--' && <span className="error-message">*</span>}
+                Canal <span className="error-message">*</span>
               </Form.Label>
               <Form.Control
                 as="select"
-                name="idEmpresa"
-                onChange={handleChange} // Asegúrate de tener una función handleChange definida
+                name="canal"
+                onChange={handleChange}
                 required
-                value={formState.idEmpresa}
+                value={formState.idCanal}
               >
+                <option value="">Seleccione un canal</option>
                 {canales.map((canal) => (
-                  <option key={canal.idCanal} value={canal.idCanal}>{canal.nemonico}</option> // Utiliza los datos de 'canales' para generar las opciones
+                  <option key={canal.idCanal} value={canal.idCanal}>
+                    {canal.nemonico}
+                  </option>
                 ))}
               </Form.Control>
             </Form.Group>
-            
 
             <Form.Group controlId="permiso">
               <Form.Label>
-                Permiso {formState.canal === '--selecione--' && <span className="error-message">*</span>}
+                Permiso <span className="error-message">*</span>
               </Form.Label>
               <Select
-                options={permisos.map((permiso) => ({
+                options={permisosCanal.map((permiso) => ({
                   value: permiso.nombre,
                   label: permiso.nombre,
+                  idPermiso: permiso.idPermiso,
+                  estado: permiso.estado
                 }))}
                 isMulti
-                value={formState.permisos.map((permiso) => ({
-                  value: permiso,
-                  label: permiso,
-                }))}
+                value={selectedPermisos}
                 onChange={handleChangePermisos}
               />
             </Form.Group>
 
-            <Button type="submit" className="btn btn-primary">
-              Crear nuevo Rol
-            </Button>
+            <Row className="justify-content-center">
+              <Col md={4}>
+                <Button
 
-            <Button type="submit" className="btn btn-secondary" onClick={handleCancel}>
-              Cancelar
-            </Button>
+                  variant="primary"
+                  type="submit"
+                  className="btnblock"
+
+                >
+                  Crear
+                </Button>
+              </Col>
+              
+            </Row>
+
           </Form>
         </Col>
       </Row>
@@ -191,5 +309,3 @@ const CreateRole = (props) => {
 };
 
 export default CreateRole;
-
-
