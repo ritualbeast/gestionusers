@@ -13,6 +13,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
   
   const [error, setError] = useState("");
   const [camposIncompletos, setCamposIncompletos] = useState([]);
+  const [tipoIdentificacionSeleccionado, setTipoIdentificacionSeleccionado] = useState('');
   const [formState, setFormState] = useState({
     nombres: "",
     apellidos: "",
@@ -40,6 +41,9 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
       sanitizedValue = value.replace(/\s+/g, '').replace(/\D/g, '').slice(0, 10);
     } else if (name === 'correo' || name === 'usuario' || name === 'contrasenia') {
       sanitizedValue = value.replace(/\s+/g, '');
+    }
+    if (name === 'tipoIdentificacion') {
+      setTipoIdentificacionSeleccionado(value);
     }
   
     setFormState((prevState) => ({
@@ -292,6 +296,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
                 onChange={handleChange}
                 style={getBorderStyle('identificacion')}
                 placeholder='Identificacion'
+                disabled={!tipoIdentificacionSeleccionado}
               />
             </Form.Group>
 

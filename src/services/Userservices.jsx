@@ -10,7 +10,6 @@ const LoginToken = async (usuario, contrasenia) => {
     
     const canales = process.env.REACT_APP_CANALES;
     const token = `Basic ${base64.encode(`${usuario}:${contrasenia}`)}`;
-    console.log(token)
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': token,
@@ -22,14 +21,14 @@ const LoginToken = async (usuario, contrasenia) => {
     };
     const response = await fetch(process.env.REACT_APP_API_TOKEN, requestOptions);
     const data = await response.json();
-    console.log(data);
-   
+    
     // Guardar los valores en el localStorage
+    if (data.success === true) { 
     localStorage.setItem('token', data.data.token);
     localStorage.setItem('data', data.data.idUsuario);
-    
     await ValidarToken();
-    
+    console.log(data);
+    }
     return data; // Retornar los datos
     
   } catch (error) {
