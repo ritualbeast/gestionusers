@@ -200,7 +200,6 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
               />
             </Form.Group>
             
-
             <Form.Group className='formuser' controlId="phone">
               <Form.Label>Telefono  <span className="required-asterisk">*</span></Form.Label>
               <Form.Control
@@ -256,6 +255,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
                 ))}
               </Form.Control>
             </Form.Group>
+
             <Form.Group className='formuser' controlId="area">
               <Form.Label>Área</Form.Label>
               <Form.Control
@@ -268,8 +268,6 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
               />
             </Form.Group>
 
-            
-            
             <Form.Group className='formuser' controlId="identificationType">
               <Form.Label>Tipo de Identificacion</Form.Label>
               <Form.Control
@@ -315,6 +313,7 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
                 <option value="I">Inactivo</option>
               </Form.Control>
             </Form.Group>
+            
             <Row className="justify-content-center">
               <Col md={4}>
                 <Button

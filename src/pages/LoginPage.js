@@ -58,10 +58,11 @@ export default function LoginPage() {
               src={logo}
               sx={{
                 position: 'fixed',
-                width: 80, height: 40,
+                width: 180, height: 80,
                 top: { xs: 16, sm: 24, md: 40 },
-                left: { xs: 16, sm: 24, md: 40 },
+                left: { xs: 16, sm: 24, md: 170 },
               }}
+              className='logo-login'
               color="inherit"
             />
           )}

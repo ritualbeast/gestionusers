@@ -26,6 +26,8 @@ const LoginToken = async (usuario, contrasenia) => {
     if (data.success === true) { 
     localStorage.setItem('token', data.data.token);
     localStorage.setItem('data', data.data.idUsuario);
+    localStorage.setItem('nombreUsuario', data.data.nombres);
+    localStorage.setItem('correoUsuario', data.data.correo);
     await ValidarToken();
     console.log(data);
     }

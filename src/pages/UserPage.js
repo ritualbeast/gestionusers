@@ -157,17 +157,17 @@ export default function UserPage() {
   };
 
   useEffect(() => {
-    // verificarLocalStorage();
+    verificarLocalStorage();
     fetchData();
 
   }, []);
   
-  // const verificarLocalStorage = () => {
-  //   const isAdmin = localStorage.getItem("nombreUsuario");
-  //   if (isAdmin === null) {
-  //     window.location.href = "/login";
-  //   }
-  // }
+  const verificarLocalStorage = () => {
+    const isAdmin = localStorage.getItem("nombreUsuario");
+    if (isAdmin === null) {
+      window.location.href = "/login";
+    }
+  }
   const fetchData = async () => {
     try {
       // clear checkitems

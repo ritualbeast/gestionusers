@@ -237,6 +237,7 @@ const ModificarUser = (props) => {
 
   const opcionesRol = consultaRol
   .filter((rol) => rol.estado === "A")
+  .sort((a, b) => a.nombre.localeCompare(b.nombre))
   .map((rol) => ({ value: rol.nombre, label: rol.nombre }));
   
   const handleOptionChange = (selectedOptions) => {
