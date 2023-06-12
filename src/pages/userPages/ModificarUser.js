@@ -48,8 +48,6 @@ const ModificarUser = (props) => {
     rolesGenerales();
   }, []);
 
-  
-  //-----------------
   useEffect(() => {
       const objeTemp = [];
 
@@ -70,8 +68,6 @@ const ModificarUser = (props) => {
 
     setFormStateRol(objeTemp);
   }, [opcionesSeleccionadas]);
-  //-----------------
-  
 
   const fetchData = async () => {
     try {
@@ -97,8 +93,6 @@ const ModificarUser = (props) => {
     }
   };  
 
-
-  //-----------------
   const sendData = async () => {
     try {
       const response = await ActualizarUsuario(userId, formState);
@@ -109,8 +103,6 @@ const ModificarUser = (props) => {
       console.error(error);
     }
   };
-  //-----------------
- 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -196,8 +188,6 @@ const ModificarUser = (props) => {
     }
   };  
   
-
-  //-----------------
   const consultarRol = async () => {
     try {
       const response = await ConsultarRolUsuario(userId);
@@ -232,10 +222,7 @@ const ModificarUser = (props) => {
       // Manejar el error de consulta de roles
     }
   };
-  //-----------------
 
-
-  //-----------------
   const rolesGenerales = async () => {
     try {
       const response = await ConsultarRoles();
@@ -247,10 +234,7 @@ const ModificarUser = (props) => {
       console.error('Error al consultar los roles:', error);
     }
   };
-  //-----------------
 
-
-  //-----------------
   const opcionesRol = consultaRol.map((rol) => ({ value: rol.nombre, label: rol.nombre }));
 
   const handleOptionChange = (selectedOptions) => {
@@ -263,7 +247,6 @@ const ModificarUser = (props) => {
     const updatedOptions = opcionesSeleccionadas.filter(option => option !== removedOption);
     setOpcionesSeleccionadas(updatedOptions);
   };
-  //-----------------
   
   return (
     <Container >

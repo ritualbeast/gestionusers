@@ -15,7 +15,6 @@ const ConsultarRoles = async (filterName='T', checkedItems='E') => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/consultarRoles/${checkedItems}/${filterName}/?pagina=1&size=100`, requestOptions);
     const data = await response.json();
-    console.log(data)
     
     return data; // Devolver los datos obtenidos
 
@@ -112,7 +111,6 @@ const ConsultarRolPorId = async (rolId) => {
 };
 
 const ActualizarRolesConPermisos = async (rolId, userData) => {
-  console.log('userId', rolId)
   console.log('Campos que se están actualizando:', userData);
   try {
     const tokenUsuario = localStorage.getItem('token');
@@ -131,7 +129,6 @@ const ActualizarRolesConPermisos = async (rolId, userData) => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/roles/actualizarRolesConPermisos/${rolId}`, requestOptions);
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error);

@@ -183,7 +183,6 @@ export default function UserPage() {
       setSelectedOption('');
       setFilterName('');
       const response = await ConsultarRoles();
-      console.log(response.data.listRoles)
       setDatosUser(response.data.listRoles);
     } catch (error) {
       console.error(error);
