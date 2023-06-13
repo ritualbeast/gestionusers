@@ -1,0 +1,12 @@
+.MuiDialogContent-root #alert-dialog-description-conf{
+    text-align: center !important;
+}
+#modal-center {
+    text-align: center;
+}
+.data-campos-group{
+    display: grid;
+    width: 65%;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}

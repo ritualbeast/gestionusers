@@ -18,7 +18,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
     nombre : '',
     descripcion : '',
     mnemonico : '',
-    estado : '',
+    estado : 'A',
     usuarioCreacion : localStorage.getItem('nombreUsuario'),
     listPermisos : [],
     idCanal: ''
@@ -181,7 +181,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
       const idCanal = canalSeleccionado.idCanal;
       await consultaPermisos(idCanal);
     }
-  };  
+  };
 
   const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
 
@@ -240,10 +240,11 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
               <Form.Control
                 as="select"
                 name="estado"
+                value={formState.estado}
                 onChange={handleChange}
+                defaultValue={formState.estado[0]}
                 required
               >
-                <option value="--selecione--">--- Selecione ---</option>
                 <option value="A">Activo</option>
                 <option value="I">Inactivo</option>
               </Form.Control>

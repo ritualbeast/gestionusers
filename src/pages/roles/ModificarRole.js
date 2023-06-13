@@ -34,10 +34,25 @@ const ModificarRole = (props) => {
   const [formStatePermiso, setFormStatePermiso] = useState([]);
   const [formStatePermisoBase, setFormStatePermisoBase] = useState([]);
 
-  const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value });
-  };
+  const handleChange = async (event) => {
+    const { name, value } = event.target;
+    setFormState((prevState) => ({
+      ...prevState,
+      [name]: value,
+      listPermisos: [],
+      idCanal: value
+    }));
+    console.log('Canal seleccionado:', value);
   
+    try {
+      const response = await ConsultarPermisos(value); // Consulta los permisos del canal seleccionado
+      const permisos = response.data.listPermisos;
+      setPermisos(permisos);
+    } catch (error) {
+      console.error('Error al obtener los permisos del canal:', error);
+    }
+  };   
+
   useEffect(() => {
     setSelectedPermisos(
       formState.listPermisos
@@ -89,33 +104,6 @@ const ModificarRole = (props) => {
     updateFormStatePermiso();
   }, [selectedPermisos]);
   
-  // const handleDelete = (removedOption) => {
-  //   // Verificar si el estado actual del permiso es diferente de "I"
-  //   if (removedOption.estado !== "I") {
-  //     // Actualizar el estado del permiso a "I"
-  //     const updatedPermisos = selectedPermisos.map(option => {
-  //       if (option === removedOption) {
-  //         return {
-  //           ...option,
-  //           estado: "I"
-  //         };
-  //       }
-  //       return option;
-  //     });
-  
-  //     setSelectedPermisos(updatedPermisos);
-  
-  //     // Imprimir los permisos con estado "A" e "I"
-  //     const activePermisos = updatedPermisos.filter(option => option.estado === "A");
-  //     const inactivePermisos = updatedPermisos.filter(option => option.estado === "I");
-  //     console.log("Permisos activos:", activePermisos);
-  //     console.log("Permisos inactivos:", inactivePermisos);
-  //   } else {
-  //     // El permiso ya se encuentra en estado "I", mostrar mensaje de error o realizar otra acción
-  //     console.log("El permiso ya se encuentra en estado I");
-  //   }
-  // };   
-   
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -225,7 +213,6 @@ const ModificarRole = (props) => {
     fetchData();
     consultarCanales();
     obtenerPermisos();
-   // consultaPermisos();
   }, []);
 
   const obtenerPermisos = async () => {
@@ -239,17 +226,6 @@ const ModificarRole = (props) => {
       console.error(error);
     }
   };
-  
-  // const consultaPermisos = async () => {
-  //   try {
-  //     const response = await ConsultarPermisos(permisoCanalId); // Pasa userIdPermiso como argumento
-  //     const canales = response.data.listPermisos;
-  //     setConsultaCanal(canales);
-
-  //   } catch (error) {
-  //     console.error('Error al consultar los canales:', error);
-  //   }
-  // };
 
   const consultarCanales = async () => {
     try{
@@ -335,16 +311,9 @@ const ModificarRole = (props) => {
   };
   
   // const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
-
-  const test = () => {
-    console.log(formState);
-  };
  
   return (
     <Container>
-      <Button onClick={test}>
-          :v 
-      </Button>
       <Row className="justify-content-center">
         <Col md={6}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

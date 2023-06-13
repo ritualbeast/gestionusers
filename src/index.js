@@ -8,7 +8,7 @@ import reportWebVitals from './reportWebVitals';
 // ----------------------------------------------------------------------
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-
+console.log(1);
 root.render(<App />);
 
 // If you want to enable client cache, register instead.

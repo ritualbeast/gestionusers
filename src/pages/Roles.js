@@ -197,13 +197,15 @@ export default function UserPage() {
 
   const handleFiltrar = async () => {
     try {
-      console.log(filterName,selectedOption)
+      console.log('filterName:', filterName,'selectedOption:',selectedOption)
+      console.log('filterName:', filterName)
       const response = await ConsultarRoles(filterName, selectedOption);
       if (response.data.listRoles.length === 0) {
         toast.error(`No se encontraron resultados para la busqueda: ${filterName}`, {
           autoClose: 1500,
         });
       } else if (response.success === true) {
+        console.log(response);
         setDatosUser(response.data.listRoles);
       } else {
         toast.error(`${response.message}`
@@ -277,23 +279,20 @@ const handleEliminar = async () => {
       }
   };
 
-  const handleEstadoChange = (event) => {
-    const { value } = event.target;
-    setSelectedEstado(value);
-    setIsSelectUsed(true);
   
-    if (selectedOption === 'No') {
-      setFilterName(value); // Actualizar el filtro de nombre
-    } else if (selectedOption === 'De') {
-      // Aquí puedes realizar la búsqueda solo en la columna de descripción según tu lógica
-    }
-  };  
+const handleEstadoChange = (event) => {
+  const { value } = event.target;
+  setSelectedEstado(value);
+  setIsSelectUsed(true);
+  console.log(value);
+  setFilterName(value);
+};
 
   return (
     <>
       <ToastContainer />
       <Helmet>
-        <title> Role | Minimal UI </title>
+        <title> Security </title>
       </Helmet>
 
       <Container>

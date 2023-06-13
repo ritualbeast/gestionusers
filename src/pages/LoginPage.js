@@ -47,7 +47,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Login  </title>
+        <title> Security  </title>
       </Helmet>
 
       <StyledRoot>

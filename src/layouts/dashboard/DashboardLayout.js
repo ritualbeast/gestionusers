@@ -5,6 +5,7 @@ import { styled } from '@mui/material/styles';
 //
 import Header from './header';
 import Nav from './nav';
+import InactivityComponent from '../../helpers/InactivityComponent';
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +38,7 @@ export default function DashboardLayout() {
 
   return (
     <StyledRoot>
+      <InactivityComponent />
       <Header onOpenNav={() => setOpen(true)} />
 
       <Nav openNav={open} onCloseNav={() => setOpen(false)} />
