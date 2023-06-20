@@ -14,7 +14,6 @@ const IdleTimerContainer = (props) => {
   const [timeoutDuration, setTimeoutDuration] = useState(1000 * 60 * 30); // 15mins
 
   const onIdleHandler = () => {
-    console.log("user is idle...");
     if (props.timeout) {
       props.handleLogout();
     } else {
@@ -26,10 +25,8 @@ const IdleTimerContainer = (props) => {
   };
 
   const onActiveHandler = () => {
-    console.log("user is active...");
     props.timedoutHandler(false);
   };
-console.log(timeoutDuration);
   return (
     <IdleTimer
       ref={idleTimerRef}

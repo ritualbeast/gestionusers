@@ -23,7 +23,7 @@ const IdleTimeOutModal = (props) => {
         </DialogTitle>
         <DialogContent>
             <DialogContentText id="alert-dialog-description-conf">
-            Se ha detectado que sobrepasó el tiempo máximo de inactividad.<br /> Si desea mantenerse conectado hacer clic en aceptar
+                Se ha detectado que sobrepasó el tiempo máximo de inactividad.<br /> Si desea mantenerse conectado hacer clic en aceptar
             </DialogContentText>
         </DialogContent>
         <DialogActions>

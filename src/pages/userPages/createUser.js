@@ -144,7 +144,6 @@ const CreateUser = ({handleCloseModal, handleRefresh}) => {
   const consultarEmpresas = async () => {
     try {
       const response = await  ConsultarEmpresas();
-      console.log(response.data.row);
       setEmpresas(response.data.row);
     } catch (error) {
       console.error(error);

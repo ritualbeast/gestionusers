@@ -165,7 +165,7 @@ export default function UserPage() {
   const verificarLocalStorage = () => {
     const isAdmin = localStorage.getItem("nombreUsuario");
     if (isAdmin === null) {
-      window.location.href = "/login";
+      window.location.href = "/security/login";
     }
   }
   const fetchData = async () => {
@@ -190,7 +190,6 @@ const handleFiltrar = async () => {
       });
       
     } else if (response.success === true) {
-      console.log(response);
       setDatosUser(response.data.row);
       // setIsNotFound(false);
       
@@ -214,7 +213,6 @@ const handleFiltrar = async () => {
 const handleEliminar = async () => {
   try {
     const response = await EliminarUsuario(idUsuario);
-    console.log(response);
     if (response.success === true) {
       fetchData();
       handleCloseEliminar();
@@ -274,14 +272,31 @@ const handleOptionChange = (event) => {
     }
 };
 
-const handleEstadoChange = (event) => {
-  const { value } = event.target;
-  setSelectedEstado(value);
-  setIsSelectUsed(true);
-  console.log(value);
-  setFilterName(value);
-};
+  const handleEstadoChange = (event) => {
+    const { value } = event.target;
+    setSelectedEstado(value);
+    setIsSelectUsed(true);
+    setFilterName(value);
+  };
 
+  useEffect(() => { 
+    validarToken();
+  }, []);
+
+  // crear consumo validarToken
+  const [validarPermiso, setvalidarPermiso] = useState([]);
+  const validarToken = async () => {
+    try {
+      const response = await  ValidarToken();
+      setvalidarPermiso(response.data.listPermisos);
+      console.log(response.data.listPermisos)
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+ const isValidCreateUser = validarPermiso.some((permiso) => permiso.idPermiso === 8);
+ 
 
   return (    
     <>
@@ -296,14 +311,16 @@ const handleEstadoChange = (event) => {
           <Typography variant="h4" gutterBottom>
             Gestion de Usuarios
           </Typography>
-          
+          {isValidCreateUser && (
           <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}
-          onClick={()=>handleOpenModal(true)}
+            onClick={()=>handleOpenModal(true)}
           >
             Nuevo Usuario
           </Button>
+          )}
         </Stack>
 
+        
         <Card>
         <div style={{ display: 'flex', alignItems: 'center', padding: '20px' }}>
           <FormControl variant="outlined" style={{ width: '20%' }}>
@@ -433,6 +450,7 @@ const handleEstadoChange = (event) => {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Card>
+        
       </Container>
 
       <Menu

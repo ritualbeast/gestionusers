@@ -79,8 +79,6 @@ const logOut = async sessionData => {
     const date = `${getDate()} ${getHour()}`;
     if (loggedUser){
       const fechaExpira = restMin(new Date(loggedUser.fechaExpiracionToken), 30);
-      console.log('date', new Date(date))
-      console.log('fechaExpira', fechaExpira)
       if (new Date(date) >= fechaExpira){
         console.log('cumple tiempo');
         await getRefresh(loggedUser)

@@ -48,7 +48,6 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
       idCanal: value // Conserva el valor de idCanal
     }));
     mostrarPermisos(value); // Actualiza los permisos según la opción seleccionada
-    console.log('Canal seleccionado:', value);
   };  
 
   const handleChangePermisos = (selectedOptions) => {
@@ -70,8 +69,6 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
     });
   
     setPermisosCanal(updatedPermisosCanal);
-  
-    console.log('Permisos seleccionados:', selectedPermisos);
   };
 
   const handleSubmit = async (e) => {
@@ -183,6 +180,12 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
     }
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === " ") {
+      event.preventDefault();
+    }
+  };  
+
   const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
 
   return (
@@ -206,6 +209,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
                 name="nombre"
                 onChange={handleChange}
                 required
+                maxLength={45}
               />
             </Form.Group>
 
@@ -218,6 +222,7 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
                 name="descripcion"
                 onChange={handleChange}
                 required
+                maxLength={400}
               />
             </Form.Group>
 
@@ -229,7 +234,9 @@ const CreateRole = ({handleCloseModal, handleRefresh, userId}) => {
                 as="textarea"
                 name="mnemonico"
                 onChange={handleChange}
+                onKeyPress={handleKeyPress}
                 required
+                maxLength={150}
               />
             </Form.Group>
 

@@ -19,7 +19,6 @@ const InactivityComponent = () => {
   };
 
   const logoutHandler = () => {
-    console.log('logout')
     globalServices.logOut({})
     setShowTimeoutModal(false);
 

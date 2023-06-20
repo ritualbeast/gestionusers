@@ -39,8 +39,10 @@ const ModificarUser = (props) => {
   const [userName, setUserName] = useState(localStorage.getItem('nombreUsuario'));
 
   const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value });
-  };
+    if (e.target.name !== 'idRol') {
+      setFormState({ ...formState, [e.target.name]: e.target.value });
+    }
+  };  
   
   useEffect(() => {
     fetchData();
@@ -96,9 +98,7 @@ const ModificarUser = (props) => {
   const sendData = async () => {
     try {
       const response = await ActualizarUsuario(userId, formState);
-      console.log(response.success);
       const responseRol = await ActualizarRolUsuario(userIdRol, formStateRol)
-      console.log(responseRol.success);
     } catch (error) {
       console.error(error);
     }
@@ -109,7 +109,6 @@ const ModificarUser = (props) => {
   
     try {
       const response = await ActualizarUsuario(userId, formState);
-      console.log(response.success);
       if (response.success === true) {
         toast.success(`${response.message}`, {
           // Configuración del toast
@@ -139,29 +138,19 @@ const ModificarUser = (props) => {
       }
     
       // Actualizar el rol existente
-      console.log('roles del usuario:', formStateRol);
 
       let objSendI = [];
       formStateRolBase.forEach(element => {
         let validate=false;
         formStateRol.forEach(el => {
-          if (element.idRol === el.idRol) { 
-            console.log('element.idRol', element.idRol);
-            console.log('el.idRol', el.idRol);         
-
+          if (element.idRol === el.idRol) {       
             validate=true
           }   
         });
-        console.log(validate);
-        if (validate === false) console.log('inactiva:', element.idRol)
+        if (validate === false)
         if (!validate) element.estado = 'I';
         if (!validate) objSendI.push(element);
       });
-
-      console.log(formStateRolBase)
-      console.log(formStateRol)
-      console.log(objSendI)
-
 
       let objSend = [];
 
@@ -175,10 +164,7 @@ const ModificarUser = (props) => {
         objSend = formStateRol
       }
 
-      console.log('objSend', objSend)
-
       const responseActualizarRol = await ActualizarRolUsuario(userId, objSend);
-      console.log(responseActualizarRol.success);
     } catch (error) {
       console.error(error);
       setError('Error al enviar el formulario');
@@ -228,7 +214,6 @@ const ModificarUser = (props) => {
       const response = await ConsultarRoles();
       
       const roles = response.data.listRoles;
-      console.log(roles);
       setConsultaRol(roles);
     } catch (error) {
       console.error('Error al consultar los roles:', error);
@@ -242,8 +227,6 @@ const ModificarUser = (props) => {
   
   const handleOptionChange = (selectedOptions) => {
     setOpcionesSeleccionadas(selectedOptions);
-
-    console.log('ejecuta: ', selectedOptions)
   };
   
   const handleOptionDelete = (removedOption) => {

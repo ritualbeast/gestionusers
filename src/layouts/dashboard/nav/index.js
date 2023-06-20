@@ -10,7 +10,7 @@ import Scrollbar from '../../../components/scrollbar';
 import NavSection from '../../../components/nav-section';
 
 import useResponsive from '../../../hooks/useResponsive';
-import navConfig from './config';
+import useNavConfig from './config';
 import logo from '../../../assets/img/ic_goit.png';
 import '../../../styles/logo.css';
 
@@ -37,7 +37,7 @@ Nav.propTypes = {
 
 export default function Nav({ openNav, onCloseNav }) {
   const { pathname } = useLocation();
-
+  const navConfig = useNavConfig();
   const isDesktop = useResponsive('up', 'lg');
 
   useEffect(() => {

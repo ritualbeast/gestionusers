@@ -33,16 +33,25 @@ const ModificarRole = (props) => {
   const [selectedPermisos, setSelectedPermisos] = useState([]);
   const [formStatePermiso, setFormStatePermiso] = useState([]);
   const [formStatePermisoBase, setFormStatePermisoBase] = useState([]);
+  const [idCanal, setIdCanal] = useState(0);
 
   const handleChange = async (event) => {
     const { name, value } = event.target;
+  
+    if (name === 'estado') {
+      setFormState((prevState) => ({
+        ...prevState,
+        [name]: value
+      }));
+      return; // No limpiar los valores de canal y permisos si el cambio fue en el estado
+    }
+  
     setFormState((prevState) => ({
       ...prevState,
       [name]: value,
       listPermisos: [],
-      idCanal: value
+      idEmpresa: value
     }));
-    console.log('Canal seleccionado:', value);
   
     try {
       const response = await ConsultarPermisos(value); // Consulta los permisos del canal seleccionado
@@ -51,7 +60,7 @@ const ModificarRole = (props) => {
     } catch (error) {
       console.error('Error al obtener los permisos del canal:', error);
     }
-  };   
+  };     
 
   useEffect(() => {
     setSelectedPermisos(
@@ -107,29 +116,18 @@ const ModificarRole = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
-
       let objSendI = [];
       formStatePermisoBase.forEach(element => {
         let validate=false;
         formStatePermiso.forEach(el => {
-          if (element.idPermiso === el.idPermiso) { 
-            console.log('element.idPermiso', element.idPermiso);
-            console.log('el.idPermiso', el.idPermiso);         
-
+          if (element.idPermiso === el.idPermiso) {      
             validate=true
           }   
         });
-        console.log(validate);
-        if (validate === false) console.log('inactiva:', element.idPermiso)
+        if (validate === false)
         if (!validate) element.estado = 'I';
         if (!validate) objSendI.push(element);
       });
-
-      console.log(formStatePermisoBase)
-      console.log(formStatePermiso)
-      console.log(objSendI)
-
 
       let objSend = [];
 
@@ -143,8 +141,6 @@ const ModificarRole = (props) => {
         objSend = formStatePermiso
       }
 
-      console.log('objSend', objSend)
-
     setFormState(prevState => ({
       ...prevState,
       listPermisos: objSend
@@ -154,7 +150,6 @@ const ModificarRole = (props) => {
     ojS.listPermisos = objSend
 
       const response = await ActualizarRolesConPermisos(roleId, ojS);
-      console.log(response.success);
       if (response.success === true) {
         toast.success(`${response.message}`, {
           position: "top-right",
@@ -199,10 +194,6 @@ const ModificarRole = (props) => {
           }
         });
       }
-
-      console.log('roles del usuario:', formStatePermiso);
-
-
     } catch (error) {
       console.error(error);
       setError('Error al enviar el formulario');
@@ -221,7 +212,6 @@ const ModificarRole = (props) => {
       const data = await ConsultarPermisos(idCanales);
       const permisos = data.data.listPermisos;
       setPermisos(permisos);
-
     } catch (error) {
       console.error(error);
     }
@@ -232,7 +222,6 @@ const ModificarRole = (props) => {
       const response = await ConsultarCanal();
       const canales = response.data.row
       setCanales(canales);
-
     }
     catch (error) {
       console.error('Error al consultar los canales:', error);
@@ -240,28 +229,40 @@ const ModificarRole = (props) => {
   }
 
   const fetchData = async () => {
-    console.log('entra')
     try {
       const response = await ConsultarRolPorId(userIdPermiso);
       const data = response.data;
-
+  
       setDatosRecibidosporId(response);
-      setFormState({
-        nombre: data.nombre,
-        descripcion: data.descripcion,
-        mnemonico: data.mnemonico,
-        estado: data.estado,
-        usuarioCreacion: nombreUsuario,
-        listPermisos: data.listPermisos || [],
-        idEmpresa: data.listPermisos && data.listPermisos.length > 0 ? data.listPermisos[0].idCanal : ''
-      });      
-      setDatospermisos(data.listPermisos)
-      console.log('entra')
-
-
+  
+      const canalEstadoA = data.listPermisos.find((permiso) => permiso.estado === 'A');
+  
+      if (canalEstadoA) {
+        setFormState({
+          nombre: data.nombre,
+          descripcion: data.descripcion,
+          mnemonico: data.mnemonico,
+          estado: data.estado,
+          usuarioCreacion: nombreUsuario,
+          listPermisos: data.listPermisos || [],
+          idEmpresa: canalEstadoA.idCanal
+        });
+        setDatospermisos(data.listPermisos);
+      } else {
+        setFormState({
+          nombre: data.nombre,
+          descripcion: data.descripcion,
+          mnemonico: data.mnemonico,
+          estado: data.estado,
+          usuarioCreacion: nombreUsuario,
+          listPermisos: [], // Establece una lista vacía de permisos
+          idEmpresa: null
+        });
+        setDatospermisos([]); // Establece una lista vacía de permisos
+      }
+  
       const permisos = response.data && response.data.listPermisos;
-      console.log(response)
-
+  
       if (permisos) {
         setFormStatePermisoBase(
           permisos.map((permiso) => ({
@@ -270,47 +271,46 @@ const ModificarRole = (props) => {
             estado: permiso.estado
           }))
         );
-        console.log(permisos)
       }
-      console.log(permisos)
-      console.log('entra')
-
-      // const objeTemp = [];
-      
-
-      // permisos.forEach((permiso)=>{
-      //     objeTemp.push(
-      //       {
-      //         "idPermiso": permiso.idPermiso,
-      //         "nombre": permiso.nombre,
-      //         "estado": permiso.estado
-      //       }
-      //     );
-
-      // })
-      // console.log(objeTemp)
-      // console.log(permisos)
-      // setFormStatePermisoBase(objeTemp)
     } catch (error) {
       console.error(error);
     }
-  };
+  };  
 
   const recibirIdEmpresa = () => {
-    return new Promise((resolve) => {
-      ConsultarRolPorId(userIdPermiso)
-        .then((response) => {
-          const data = response.data;
-          resolve(data.listPermisos[0].idCanal);
-        })
-        .catch((error) => {
-          console.error(error);
-          resolve(null);
-        });
-    });
-  };
-  
-  // const opcionesCanal = consultaCanal.map((canal) => ({value: canal.nombre, label: canal.nombre}));
+  return new Promise((resolve) => {
+    ConsultarRolPorId(userIdPermiso)
+      .then((response) => {
+        const data = response.data;
+        console.log(data);
+
+        let idEmpresa = null;
+        let idCanal = null;
+
+        for (let i = 0; i < data.listPermisos.length; i += 1) {
+          const permiso = data.listPermisos[i];
+          if (permiso.estado === "A") {
+            idEmpresa = permiso.idCanal;
+            idCanal = i;
+            break;
+          }
+        }
+
+        resolve(idEmpresa);
+        setIdCanal(idCanal);
+      })
+      .catch((error) => {
+        console.error(error);
+        resolve(null);
+      });
+  });
+};
+
+  const handleKeyPress = (event) => {
+    if (event.key === " ") {
+      event.preventDefault();
+    }
+  }; 
  
   return (
     <Container>
@@ -335,6 +335,7 @@ const ModificarRole = (props) => {
                 placeholder="Nombre del rol"
                 onChange={handleChange}
                 required
+                maxLength={45}
               />
             </Form.Group>
 
@@ -349,6 +350,7 @@ const ModificarRole = (props) => {
                 placeholder="Descripción del rol"
                 onChange={handleChange}
                 required
+                maxLength={400}
               />
             </Form.Group>
 
@@ -362,7 +364,9 @@ const ModificarRole = (props) => {
                 value={formState.mnemonico}
                 placeholder="Nombre del rol"
                 onChange={handleChange}
+                onKeyPress={handleKeyPress}
                 required
+                maxLength={150}
               />
             </Form.Group>
 
@@ -375,9 +379,9 @@ const ModificarRole = (props) => {
                 name="estado"
                 value={formState.estado}
                 onChange={handleChange}
+                defaultValue={formState.estado[0]}
                 required
               >
-                <option value="--selecione--">--- Selecione ---</option>
                 <option value="A">Activo</option>
                 <option value="I">Inactivo</option>
               </Form.Control>

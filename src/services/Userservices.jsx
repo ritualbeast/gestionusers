@@ -29,7 +29,6 @@ const LoginToken = async (usuario, contrasenia) => {
     localStorage.setItem('nombreUsuario', data.data.nombres);
     localStorage.setItem('correoUsuario', data.data.correo);
     await ValidarToken();
-    console.log(data);
     }
     return data; // Retornar los datos
     
@@ -41,7 +40,8 @@ const LoginToken = async (usuario, contrasenia) => {
 };
 
 
-const ValidarToken = async (info) => {
+const ValidarToken = async () => {
+  const nemonicoCanal = 'GOIT_SECURITY';
   try {
     const idUsuario = localStorage.getItem('data');
     const tokenUsuario = localStorage.getItem('token');
@@ -56,7 +56,8 @@ const ValidarToken = async (info) => {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        idUsuario
+        idUsuario,
+        nemonicoCanal
       })
     };
     const response = await fetch(process.env.REACT_APP_VALIDAR_LOGIN_URL, requestOptions);
@@ -64,11 +65,13 @@ const ValidarToken = async (info) => {
     localStorage.setItem('tokenValidado', data.data.token);
     localStorage.setItem('nombreUsuario', data.data.nombres);
     localStorage.setItem('correoUsuario', data.data.correo);
+    console.log('data', data);
     await ConsultaUsuarios();
-    
+    return data;
 
   } catch (error) {
     console.error(error);
+    throw error;
   }
 };
 
@@ -104,7 +107,6 @@ const ConsultaUsuarios = async (filterName='T', checkedItems='E') => {
 };
 
 const CrearUsuario = async (datosUsuario) => {
-  console.log(datosUsuario);
   const tokenUsuario = localStorage.getItem('token');
   const canales = process.env.REACT_APP_CANALES;
   const token = `Bearer ${tokenUsuario}`;
@@ -189,9 +191,6 @@ const ObtenerUsuarioPorId = async (userId) => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/obtenerUsuarioPorId/${userId}`, requestOptions);
     const data = await response.json();
-    console.log(data);
-    
-
     return data; // Devolver los datos obtenidos
 
   } catch (error) {
@@ -218,16 +217,12 @@ const ActualizarUsuario = async (userId, userData) => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/actualizarUsuario/${userId}`, requestOptions);
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error);
     throw error;
   }
 };
-
-
-
 
   export {
      LoginToken, ConsultaUsuarios, ValidarToken, CrearUsuario, EliminarUsuario, ObtenerUsuarioPorId, ActualizarUsuario

@@ -40,6 +40,7 @@ import { UserListHead, UserListToolbar } from '../sections/@dashboard/user';
 // mock
 import CreateRole from './roles/createRole';
 import ModificarRole from './roles/ModificarRole';
+import { ValidarToken } from '../services/Userservices';
 import { ConsultarRoles, EliminarRol } from '../services/ServicesRol';
 
 // ----------------------------------------------------------------------
@@ -94,9 +95,9 @@ function applySortFilter(array, comparator, query) {
 export default function UserPage() {
   const [open, setOpen] = useState(null);
   const [page, setPage] = useState(0);
-  const [order, setOrder] = useState('asc');
+  // const [order, setOrder] = useState('asc');
   const [selected, setSelected] = useState([]);
-  const [orderBy, setOrderBy] = useState('name');
+  // const [orderBy, setOrderBy] = useState('name');
   const [filterName, setFilterName] = useState('A');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [openModal, setOpenModal] = useState(false);
@@ -106,14 +107,14 @@ export default function UserPage() {
   const [isSelectUsed, setIsSelectUsed] = useState(false);
   const [isToolbarUsed, setIsToolbarUsed] = useState(false); // Cambiar el orden
   const isButtonDisabled = !(isSelectUsed && isToolbarUsed);
-  const [valorcheck2, setValorcheck2] = useState('');
+  // const [valorcheck2, setValorcheck2] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [isNotFound, setIsNotFound] = useState(false);
-  const [checkedItems, setCheckedItems] = useState({
-    nombre: '',
-    descripcion: '',
-    estado: '',
-  });  
+  // const [checkedItems, setCheckedItems] = useState({
+  //   nombre: '',
+  //   descripcion: '',
+  //   estado: '',
+  // });  
   
   const handleOpenMenu = (event, roleId) => {
     setOpen(event.currentTarget);
@@ -178,7 +179,7 @@ export default function UserPage() {
   const verificarLocalStorage = () => {
     const isAdmin = localStorage.getItem("nombreUsuario");
     if (isAdmin === null) {
-      window.location.href = "/login";
+      window.location.href = "/security/login";
     }
   }
 
@@ -197,15 +198,12 @@ export default function UserPage() {
 
   const handleFiltrar = async () => {
     try {
-      console.log('filterName:', filterName,'selectedOption:',selectedOption)
-      console.log('filterName:', filterName)
       const response = await ConsultarRoles(filterName, selectedOption);
       if (response.data.listRoles.length === 0) {
         toast.error(`No se encontraron resultados para la busqueda: ${filterName}`, {
           autoClose: 1500,
         });
       } else if (response.success === true) {
-        console.log(response);
         setDatosUser(response.data.listRoles);
       } else {
         toast.error(`${response.message}`
@@ -222,7 +220,6 @@ export default function UserPage() {
 const handleEliminar = async () => {
   try {
     const response = await EliminarRol(selectedUserId);
-    console.log(response);
     if (response.success === true) {
       fetchData();
       handleCloseEliminar();
@@ -279,14 +276,31 @@ const handleEliminar = async () => {
       }
   };
 
-  
-const handleEstadoChange = (event) => {
-  const { value } = event.target;
-  setSelectedEstado(value);
-  setIsSelectUsed(true);
-  console.log(value);
-  setFilterName(value);
-};
+  const handleEstadoChange = (event) => {
+    const { value } = event.target;
+    setSelectedEstado(value);
+    setIsSelectUsed(true);
+    setFilterName(value);
+  };
+
+  useEffect(() => { 
+    validarToken();
+  }, []);
+
+   // crear consumo validarToken
+   const [validarPermiso, setvalidarPermiso] = useState([]);
+   const validarToken = async () => {
+     try {
+       const response = await  ValidarToken();
+       setvalidarPermiso(response.data.listPermisos);
+       console.log(response.data.listPermisos)
+     } catch (error) {
+       console.error(error);
+     }
+   };
+
+   const isValidCreateRol = validarPermiso.some((permiso) => permiso.idPermiso === 9);
+   
 
   return (
     <>
@@ -300,11 +314,15 @@ const handleEstadoChange = (event) => {
             <Typography variant="h4" gutterBottom>
               Roles de Usuario
             </Typography>
-            <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />}
-            onClick={handleOpenModal}
-            >
-              Nuevo Rol
-            </Button>
+            {isValidCreateRol && (
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="eva:plus-fill" />}
+                onClick={handleOpenModal}
+              >
+                Nuevo Rol
+              </Button>
+            )}
           </Stack>
 
           <Card>
@@ -433,7 +451,8 @@ const handleEstadoChange = (event) => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
-            </Card>
+          </Card>
+          
       </Container>
 
       <Menu

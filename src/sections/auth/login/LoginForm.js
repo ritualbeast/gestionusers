@@ -24,11 +24,10 @@ export default function LoginForm() {
 
     try {
       const response = await LoginToken(usuario, contrasenia);
-      console.log(response);
 
       if (response.success === true) {
         toast.success('Bienvenido');
-        navigate('/user', { replace: true });
+        navigate('/security/user', { replace: true });
       } else {
         const errorMessage = response.message;
         toast.error(errorMessage);

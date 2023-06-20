@@ -66,8 +66,6 @@ const CrearRol = async (datosRol) => {
       usuarioCreacion: datosRol.usuarioCreacion,
       listPermisos: datosRol.listPermisos
     };
-
-    console.log('body', body)
     const requestOptions = {
       method: 'POST',
       headers,
@@ -111,7 +109,6 @@ const ConsultarRolPorId = async (rolId) => {
 };
 
 const ActualizarRolesConPermisos = async (rolId, userData) => {
-  console.log('Campos que se están actualizando:', userData);
   try {
     const tokenUsuario = localStorage.getItem('token');
     const canales = '5b538d10-fcb3-11ed-be56-0242ac120002';

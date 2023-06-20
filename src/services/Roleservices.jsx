@@ -47,10 +47,7 @@ const AsignarRolUsuario = async (datosRolUsuario) => {
     };
     const response = await fetch('http://desa.goitsa.me:8988/goit-security-api/v2/usuario/roles/asignarRolUsuario', requestOptions);
     const data = await response.json();
-    console.log(data);
-
     return data; // Devolver los datos obtenidos
-
   } catch (error) {
     console.error(error);
     throw error; // Lanzar el error para que sea capturado en el lugar donde se llama a la función
@@ -80,7 +77,6 @@ const ActualizarRolUsuario = async (userIdRol, userData) => {
     };
     const response = await fetch(`http://desa.goitsa.me:8988/goit-security-api/v2/usuario/roles/actualizarRolUsuario/${userIdRol}`, requestOptions);
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error(error);

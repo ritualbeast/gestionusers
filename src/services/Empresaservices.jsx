@@ -16,7 +16,6 @@ const ConsultarEmpresas = async () => {
       };
       const response = await fetch('http://desa.goitsa.me:8988/goit-security-api/v2/empresa/consultarEmpresas', requestOptions);
       const data = await response.json();
-      console.log(data);
       return data;
     } catch (error) {
       console.error(error);
